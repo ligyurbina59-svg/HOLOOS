@@ -17,7 +17,6 @@ from integrations.game_library.router import router as game_router
 ROOT = Path(__file__).resolve().parents[1]
 UI_DIR = ROOT / "android24creator"
 CEBOLLA_DIR = ROOT / "imports" / "Cebolla"
-CEBOLLA_GAMES_DIR = ROOT / "imports" / "Cebolla-games"
 app = FastAPI(title="Android24Creator Local Backend", version="0.3.0")
 origins = [
     item.strip()
@@ -42,11 +41,6 @@ app.mount(
     "/projects/cebolla",
     StaticFiles(directory=str(CEBOLLA_DIR), html=True, check_dir=False),
     name="cebolla-assets",
-)
-app.mount(
-    "/games/archives",
-    StaticFiles(directory=str(CEBOLLA_GAMES_DIR), html=True, check_dir=False),
-    name="cebolla-game-archives",
 )
 
 
