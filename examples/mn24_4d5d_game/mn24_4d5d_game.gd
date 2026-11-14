@@ -238,4 +238,4 @@ func _collect_nearby_core() -> void:
 func _update_hud() -> void:
     var vertex_count := 1 << dimension
     var edge_count := dimension * (1 << (dimension - 1))
-    hud.text = "MN24 4D/5D EXPLORER  |  DIMENSIÓN: " + str(dimension) + "D\nVértices: " + str(vertex_count) + "  |  Aristas: " + str(edge_count) + "  |  Núcleos: " + str(collected) + "/3\nWASD mover · ESPACIO/C bajar/subir · E recoger · R rotación · 4/5 cambiar dimensión · HOME reiniciar"
+    hud.text = "MN24 4D/5D EXPLORER  |  DIMENSIÓN: " + str(dimension) + "D\nVértices: " + str(vertex_count) + "  |  Aristas: " + str(edge_count) + "  |  Núcleos: " + str(collected) + "/3\nWASD mover · ESPACIO subir · C bajar · E recoger · R rotación · 4/5 cambiar dimensión · HOME reiniciar"
