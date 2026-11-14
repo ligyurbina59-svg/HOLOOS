@@ -189,7 +189,7 @@ func _move_player(delta: float) -> void:
     if Input.is_key_pressed(KEY_A): direction.x -= 1.0
     if Input.is_key_pressed(KEY_D): direction.x += 1.0
     if Input.is_key_pressed(KEY_SPACE): direction.y += 1.0
-    if Input.is_key_pressed(KEY_CTRL): direction.y -= 1.0
+    if Input.is_key_pressed(KEY_C): direction.y -= 1.0
     if direction.length_squared() > 0.0:
         player_position += direction.normalized() * movement_speed * delta
     player_position.x = clampf(player_position.x, -8.0, 8.0)
