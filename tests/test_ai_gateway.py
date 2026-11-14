@@ -28,3 +28,15 @@ def test_chat_request_limits_messages():
 def test_chat_message_limits_content():
     with pytest.raises(Exception):
         ChatMessage(role="user", content="x" * 16001)
+
+
+def test_backend_mounts_mn24_routes():
+    from android24creator_backend.main import app
+
+    paths = {route.path for route in app.routes}
+    assert "/api/ai/providers" in paths
+    assert "/api/ai/chat" in paths
+    assert "/api/integrations/github/project/inspect" in paths
+    assert "/app/expansion" in paths
+    assert "/app/m-radio" in paths
+    assert "/app/appbuilder" in paths
