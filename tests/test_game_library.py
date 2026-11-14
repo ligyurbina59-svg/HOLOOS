@@ -24,7 +24,7 @@ async def test_catalog_detects_imported_html5_game(tmp_path, monkeypatch):
     result = await games.catalog()
     holo = next(item for item in result["web_games"] if item["id"] == "holochron")
     assert holo["available"] is True
-    assert holo["launch_url"] == "/games/play/holochron"
+    assert holo["launch_url"] == "/api/games/play/holochron"
 
 
 @pytest.mark.anyio
@@ -50,6 +50,6 @@ def test_backend_mounts_game_library_routes():
     route_paths = {getattr(route, "path", None) for route in app.routes}
     assert "/api/games/catalog" in paths
     assert "/api/games/status" in paths
-    assert "/games/play/{slug}" in paths
+    assert "/api/games/play/{slug}" in paths
     assert "/app/games" in route_paths
     assert "/games/archives" in route_paths
