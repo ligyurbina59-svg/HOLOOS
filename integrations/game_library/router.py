@@ -33,7 +33,7 @@ async def catalog() -> dict:
         web.append({
             "id": slug, **game, "type": "html5",
             "available": present,
-            "launch_url": f"/games/play/{slug}" if present else None,
+            "launch_url": f"/api/games/play/{slug}" if present else None,
         })
     archives = []
     archive_root = ROOT / "imports" / "Cebolla-games"
