@@ -44,3 +44,14 @@ async def test_inventory_requires_import(tmp_path, monkeypatch):
     with pytest.raises(HTTPException) as error:
         await importer.inventory()
     assert error.value.status_code == 404
+
+
+def test_backend_mounts_cebolla_web_android_and_api_routes():
+    from android24creator_backend.main import app
+
+    api_paths = set(app.openapi()["paths"])
+    route_paths = {getattr(route, "path", None) for route in app.routes}
+    assert "/api/cebolla/status" in api_paths
+    assert "/api/cebolla/inventory" in api_paths
+    assert "/app/cebolla" in route_paths
+    assert "/projects/cebolla" in route_paths
