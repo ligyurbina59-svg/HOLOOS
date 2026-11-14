@@ -44,7 +44,11 @@ def test_project_inspection_builds_safe_manifest(monkeypatch):
         }
 
     monkeypatch.setattr(github_router, "_get_github", fake_github)
-    result = asyncio.run(github_router.inspect_project())
+    result = asyncio.run(github_router.inspect_project(
+        repository="ligyurbina59-svg/HOLOOS",
+        ref="main",
+        path="",
+    ))
     assert result["project"]["category"] == "software"
     assert result["project"]["technology_hint"] == "JavaScript/TypeScript"
     assert result["safety"]["inspection_only"] is True
