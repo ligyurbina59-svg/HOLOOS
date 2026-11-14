@@ -19,7 +19,10 @@ DEFAULT_REPOSITORY = "ligyurbina59-svg/HOLOOS"
 
 
 def _allowed_repositories() -> set[str]:
-    raw = os.getenv("GITHUB_REPOSITORY_ALLOWLIST", DEFAULT_REPOSITORY)
+    raw = os.getenv(
+        "GITHUB_REPOSITORY_ALLOWLIST",
+        "ligyurbina59-svg/HOLOOS,ligyurbina59-svg/Cebolla",
+    )
     return {item.strip() for item in raw.split(",") if item.strip()}
 
 
