@@ -6,7 +6,7 @@ if [ ! -x .venv/bin/python ]; then
   exit 1
 fi
 . .venv/bin/activate
-export GITHUB_REPOSITORY_ALLOWLIST="${GITHUB_REPOSITORY_ALLOWLIST:-ligyurbina59-svg/HOLOOS}"
+export GITHUB_REPOSITORY_ALLOWLIST="${GITHUB_REPOSITORY_ALLOWLIST:-ligyurbina59-svg/HOLOOS,ligyurbina59-svg/Cebolla}"
 export HOST="${HOST:-127.0.0.1}"
 export PORT="${PORT:-8000}"
 exec uvicorn android24creator_backend.main:app --host "$HOST" --port "$PORT"
