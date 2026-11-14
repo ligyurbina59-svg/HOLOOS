@@ -115,7 +115,7 @@ async def inspect_project(
         technology = "Multimedia"
     else:
         technology = "Undetermined"
-    if "androidmanifest.xml" in names or "build.gradle" in names or "settings.gradle" in names:
+    if any(name.endswith("androidmanifest.xml") or name.endswith("build.gradle") or name.endswith("settings.gradle") for name in names):
         category = "android_app"
     elif any(name.endswith((".glb", ".gltf", ".fbx", ".blend")) for name in names):
         category = "3d_product"
@@ -134,7 +134,8 @@ async def inspect_project(
             "name": (prefix.split("/")[-1] if prefix else repo.split("/")[-1]),
             "category": category,
             "technology_hint": technology,
-            "file_count": len(entries),
+            "file_count": sum(1 for item in entries if item["type"] == "blob"),
+            "entry_count": len(entries),
             "extensions": sorted(extensions),
         },
         "files": entries,
