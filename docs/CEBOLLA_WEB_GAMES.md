@@ -29,7 +29,7 @@ Open `http://127.0.0.1:8000/app/games`.
 - `GET /api/games/play/signal-earth`
 - `GET /api/games/play/stormrunner-ragnarok`
 - `GET /api/games/play/pantheon-front`
-- `/games/archives/{slug}/` is reserved for safely extracted archive assets; inspect each package and locate its actual entry HTML before publishing/launching.
+- ZIP contents are extracted to a private local directory and are not served to the browser until manual review and an explicit launch integration.
 
 The game player uses an iframe sandbox. These source games use Canvas and inline JavaScript; the sandbox permits scripts and same-origin localStorage, but denies top-level navigation and popups.
 
