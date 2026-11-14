@@ -33,7 +33,7 @@ class MN24Clipboard:
         try:
             if not scrap.get_init():
                 scrap.init()
-            scrap.put(scrap.SCRAP_TEXT, value.encode("utf-8") + b"\\0")
+            scrap.put(scrap.SCRAP_TEXT, value.encode("utf-8") + b"\0")
         except Exception as exc:
             raise RuntimeError("Could not write to the system clipboard") from exc
 
@@ -48,4 +48,4 @@ class MN24Clipboard:
             raise RuntimeError("Could not read the system clipboard") from exc
         if not data:
             return ""
-        return data.decode("utf-8", errors="replace").rstrip("\\0")
+        return data.decode("utf-8", errors="replace").rstrip("\0")
