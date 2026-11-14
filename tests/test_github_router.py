@@ -49,7 +49,8 @@ def test_project_inspection_builds_safe_manifest(monkeypatch):
     assert result["project"]["technology_hint"] == "JavaScript/TypeScript"
     assert result["safety"]["inspection_only"] is True
     assert result["safety"]["code_executed"] is False
-    assert result["project"]["file_count"] == 3
+    assert result["project"]["file_count"] == 2
+    assert result["project"]["entry_count"] == 3
 
 
 def test_project_inspection_rejects_invalid_ref():
