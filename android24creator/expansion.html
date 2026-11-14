@@ -1,0 +1,48 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#07111f"><title>MN24 Global Expansion</title>
+<style>
+:root{color-scheme:dark;font-family:system-ui,sans-serif;background:#07111f;color:#e8f1ff}
+*{box-sizing:border-box}body{margin:0;background:radial-gradient(circle at 20% 0,#16365d,#07111f 52%);min-height:100vh}
+main{max-width:1050px;margin:auto;padding:24px 16px}.muted{color:#9fb2ca}.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px}
+.card{background:#101f32;border:1px solid #29435f;border-radius:15px;padding:16px;min-height:140px}
+a{color:#a5d2ff;text-decoration:none}a:hover{text-decoration:underline}
+h1{color:#a8d8ff;margin:.2rem 0}.tag{font-size:.75rem;color:#67dfc5;letter-spacing:.12em}
+.status{font-size:.78rem;color:#f3d18a}
+</style></head><body><main>
+<p class="tag">MN24 LABS · GLOBAL AI & DIGITAL PRODUCT STUDIO</p>
+<h1>MN24 GLOBAL EXPANSION</h1>
+<p class="muted">Centro modular para inteligencia artificial, desarrollo, comunicaciones y distribución de productos digitales.</p>
+<div class="grid">
+<article class="card"><h2>GitHub Manager</h2><p class="muted">Repositorios, ramas e importación de proyectos.</p><a href="/app/github-manager">Abrir GitHub Bridge →</a><p class="status">LECTURA · escrituras mediante PR pendiente</p></article>
+<article class="card"><h2>Multi-AI Chat</h2><p class="muted">ChatGPT API, Claude API y DeepSeek API desde el backend local.</p><a href="#ai">Abrir panel AI →</a><p class="status">Requiere claves API de cada proveedor</p></article>
+<article class="card"><h2>Codex</h2><p class="muted">Flujo de programación asistida y revisión de cambios.</p><a href="/api/ai/codex" target="_blank" rel="noopener">Ver handoff Codex →</a><p class="status">Handoff externo · no es una sesión Codex conectada</p></article>
+<article class="card"><h2>M-Radio Control AI</h2><p class="muted">Gamepad, Bluetooth HID, USB HID y PTT.</p><a href="/app/m-radio">Abrir M-Radio →</a><p class="status">UI preparada · puente Android pendiente</p></article>
+<article class="card"><h2>Android24Creator AppBuilder</h2><p class="muted">Importar, organizar y preparar aplicaciones, juegos y software.</p><p class="status">AppBuilder: siguiente módulo de construcción</p></article>
+<article class="card"><h2>Global Product Expansion</h2><p class="muted">Catálogo, idiomas, regiones, publicación y socios.</p><p class="status">Arquitectura inicial · operaciones comerciales pendientes</p></article>
+</div>
+<section id="ai" class="card" style="margin-top:16px">
+<h2>AI Chat Gateway</h2>
+<p class="muted">Las claves se guardan solo en variables de entorno del servidor Termux. No las introduzcas aquí ni en el navegador.</p>
+<label for="provider">Proveedor</label><select id="provider"><option value="chatgpt">ChatGPT / OpenAI API</option><option value="claude">Claude API</option><option value="deepseek">DeepSeek API</option></select>
+<label for="prompt">Mensaje</label><textarea id="prompt" rows="4" style="width:100%;background:#071727;color:#fff;border:1px solid #34516e;border-radius:9px;padding:10px"></textarea>
+<button id="send" style="padding:11px 18px;background:#1c6b79;color:white;border:0;border-radius:9px">Enviar</button>
+<pre id="answer" class="muted" style="white-space:pre-wrap;overflow-wrap:anywhere"></pre>
+</section>
+<p class="muted">Privacidad: este MVP no persiste el historial de chat. Los proveedores externos procesan los mensajes enviados según sus propias condiciones.</p>
+</main>
+<script>
+const $=id=>document.getElementById(id);
+$("send").addEventListener("click",async()=>{
+ const content=$("prompt").value.trim(); if(!content){$("answer").textContent="Escribe un mensaje.";return;}
+ $("send").disabled=true;$("answer").textContent="Enviando…";
+ try{
+  const res=await fetch("/api/ai/chat",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({provider:$("provider").value,messages:[{role:"user",content}],max_tokens:1200})});
+  const data=await res.json();if(!res.ok)throw new Error(data.detail||"Error de API");
+  $("answer").textContent=data.answer;
+ }catch(e){$("answer").textContent="No disponible: "+e.message;}
+ finally{$("send").disabled=false;}
+});
+</script></body></html>
