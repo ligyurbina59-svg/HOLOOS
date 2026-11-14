@@ -10,7 +10,6 @@ from integrations.cebolla_importer import router as importer
 async def test_status_reports_not_imported_when_directory_missing(tmp_path, monkeypatch):
     root = tmp_path / "imports" / "Cebolla"
     monkeypatch.setattr(importer, "ROOT", tmp_path)
-    monkeypatch.setattr(importer, "ROOT", tmp_path)
     monkeypatch.setattr(importer, "IMPORT_DIR", root)
     monkeypatch.setattr(importer, "MANIFEST", root / ".mn24-import-manifest.json")
     result = await importer.status()
@@ -20,8 +19,8 @@ async def test_status_reports_not_imported_when_directory_missing(tmp_path, monk
 
 @pytest.mark.anyio
 async def test_status_reads_import_manifest(tmp_path, monkeypatch):
-    root = tmp_path / "Cebolla"
-    root.mkdir()
+    root = tmp_path / "imports" / "Cebolla"
+    root.mkdir(parents=True)
     manifest = root / ".mn24-import-manifest.json"
     manifest.write_text(json.dumps({
         "source_commit": "abc123",
@@ -38,7 +37,8 @@ async def test_status_reads_import_manifest(tmp_path, monkeypatch):
 
 @pytest.mark.anyio
 async def test_inventory_requires_import(tmp_path, monkeypatch):
-    root = tmp_path / "Cebolla"
+    root = tmp_path / "imports" / "Cebolla"
+    monkeypatch.setattr(importer, "ROOT", tmp_path)
     monkeypatch.setattr(importer, "IMPORT_DIR", root)
     monkeypatch.setattr(importer, "MANIFEST", root / ".mn24-import-manifest.json")
     with pytest.raises(HTTPException) as error:
