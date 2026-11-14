@@ -58,6 +58,15 @@ def _provider_status() -> list[dict]:
             "mode": "api",
         })
     result.append({
+        "id": "claude_code",
+        "configured": False,
+        "credential_configured": False,
+        "model_configured": False,
+        "model": None,
+        "mode": "external_handoff",
+        "note": "Claude Code is a local coding-agent workflow, separate from Claude API chat.",
+    })
+    result.append({
         "id": "codex",
         "configured": False,
         "credential_configured": False,
@@ -164,6 +173,15 @@ async def _call_provider(payload: ChatRequest) -> str:
 async def chat(payload: ChatRequest) -> dict:
     answer = await _call_provider(payload)
     return {"provider": payload.provider, "answer": answer, "stored": False}
+
+@router.get("/claude-code")
+async def claude_code_handoff() -> dict:
+    return {
+        "provider": "claude_code",
+        "status": "external_handoff",
+        "message": "Use Claude Code CLI or its supported application workflow separately. This API does not impersonate a Claude Code session.",
+        "repository_workflow": "Use an isolated feature branch, review the diff, run tests, and open a pull request.",
+    }
 
 @router.get("/codex")
 async def codex_handoff() -> dict:
