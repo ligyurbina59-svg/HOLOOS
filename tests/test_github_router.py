@@ -32,6 +32,8 @@ from integrations.github import router as github_router
 
 def test_project_inspection_builds_safe_manifest(monkeypatch):
     async def fake_github(url):
+        if "/branches/" in url:
+            return {"commit": {"commit": {"tree": {"sha": "tree-sha"}}}}
         return {
             "truncated": False,
             "tree": [
