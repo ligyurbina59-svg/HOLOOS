@@ -77,6 +77,21 @@ Endpoints:
 
 Optional query parameters: `repository=owner/name`, `ref=branch-or-tag`. Only repositories in `GITHUB_REPOSITORY_ALLOWLIST` are accepted.
 
+## AppBuilder browser UI
+
+A static, read-only browser interface is available at `android24creator/github-manager.html`. Serve it from the same origin as FastAPI (or configure CORS for a specific trusted origin). Set the API base URL in the UI if the backend is mounted elsewhere. It lists directories and opens UTF-8 text files; it never receives a GitHub token and never executes repository files.
+
+## Local tests
+
+Install test dependencies:
+
+```bash
+python -m pip install pytest
+pytest -q
+```
+
+The included tests cover repository allowlisting and path validation. They are not a substitute for API integration tests against a configured GitHub token.
+
 ## Security controls and required production work
 
 Implemented in this bridge:
