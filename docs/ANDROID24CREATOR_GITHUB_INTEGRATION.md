@@ -141,3 +141,23 @@ Before public deployment:
 - **NOT VERIFIED:** APK contents, ZIP contents, runtime behavior, build reproducibility, security scan and production deployment.
 
 Do not merge this branch or enable write operations until the pending checks are completed.
+
+
+## Additional MN24 modules (feature branch)
+
+The feature branch also adds the AI gateway, M-Radio interface and expansion shell. See `docs/MN24_AI_RADIO_EXPANSION.md`.
+
+New local routes:
+- `GET /app/expansion`
+- `GET /app/m-radio`
+- `GET /app/appbuilder`
+- `GET /api/ai/providers`
+- `POST /api/ai/chat`
+- `GET /api/ai/codex`
+- `GET /api/ai/claude-code`
+
+The GitHub read-only allowlist defaults to HOLOOS and Cebolla. Override it with `GITHUB_REPOSITORY_ALLOWLIST` in the Termux environment.
+
+AI API credentials are optional and provider-specific. ChatGPT/OpenAI API, Claude API and DeepSeek API calls are made only when the corresponding server-side key and model variables are configured. Claude Code and Codex are external coding-agent handoffs, not API chat providers. No third-party credentials were added to the repository.
+
+The AppBuilder page currently inspects repository metadata and generates a manifest only; source import/build execution remains gated pending manual review and explicit approval. M-Radio is a user-interface scaffold; no native Bluetooth/USB HID implementation is claimed.
