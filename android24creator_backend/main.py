@@ -12,10 +12,12 @@ from fastapi.staticfiles import StaticFiles
 from integrations.github.router import router as github_router
 from integrations.ai_gateway.router import router as ai_router
 from integrations.cebolla_importer.router import router as cebolla_router
+from integrations.game_library.router import router as game_router
 
 ROOT = Path(__file__).resolve().parents[1]
 UI_DIR = ROOT / "android24creator"
 CEBOLLA_DIR = ROOT / "imports" / "Cebolla"
+CEBOLLA_GAMES_DIR = ROOT / "imports" / "Cebolla-games"
 app = FastAPI(title="Android24Creator Local Backend", version="0.3.0")
 origins = [
     item.strip()
@@ -35,10 +37,16 @@ app.add_middleware(
 app.include_router(github_router, prefix="/api")
 app.include_router(ai_router, prefix="/api")
 app.include_router(cebolla_router, prefix="/api")
+app.include_router(game_router, prefix="/api")
 app.mount(
     "/projects/cebolla",
     StaticFiles(directory=str(CEBOLLA_DIR), html=True, check_dir=False),
     name="cebolla-assets",
+)
+app.mount(
+    "/games/archives",
+    StaticFiles(directory=str(CEBOLLA_GAMES_DIR), html=True, check_dir=False),
+    name="cebolla-game-archives",
 )
 
 
@@ -89,4 +97,12 @@ async def cebolla_import():
     file = UI_DIR / "cebolla-import.html"
     if not file.is_file():
         return JSONResponse(status_code=404, content={"detail": "Cebolla import UI file not found"})
+    return FileResponse(file, media_type="text/html")
+
+
+@app.get("/app/games", include_in_schema=False)
+async def game_library():
+    file = UI_DIR / "games.html"
+    if not file.is_file():
+        return JSONResponse(status_code=404, content={"detail": "Game library UI file not found"})
     return FileResponse(file, media_type="text/html")
