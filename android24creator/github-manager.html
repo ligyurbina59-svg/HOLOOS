@@ -34,7 +34,7 @@ pre{white-space:pre-wrap;overflow-wrap:anywhere;max-height:65vh;overflow:auto;ba
 <div class="toolbar">
 <label class="muted" for="branch">Rama / referencia</label>
 <input id="branch" value="feat/android24creator-github-integration">
-<button id="refresh">Cargar raíz</button>
+<button id="refresh">Cargar raíz</button><button id="inspect">Analizar proyecto</button>
 </div>
 <div class="grid">
 <div><h2>Archivos y directorios</h2><ul id="tree"><li class="muted">Conecta para cargar el repositorio.</li></ul></div>
@@ -100,6 +100,15 @@ $("connect").addEventListener("click",async()=>{
   } catch(e){setStatus("Conexión fallida: "+e.message);}
 });
 $("refresh").addEventListener("click",()=>loadDirectory(""));
+$("inspect").addEventListener("click",async()=>{
+  setStatus("Analizando estructura del proyecto (solo metadatos)…");
+  try {
+    const result=await request("/project/inspect",{repository:state.repository,ref:$("branch").value.trim()});
+    $("file-title").textContent="Manifiesto de importación · "+result.project.name;
+    $("file").textContent=JSON.stringify(result,null,2);
+    setStatus("Inspección terminada · "+result.project.file_count+" entradas · "+result.project.category+" · no se descargó ni ejecutó código.");
+  } catch(e){setStatus("Error de inspección: "+e.message);}
+});
 </script>
 </body>
 </html>
