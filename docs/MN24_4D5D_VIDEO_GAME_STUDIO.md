@@ -43,3 +43,17 @@ Create exports/ first. Input filename is an example; replace it with the actual 
 - PENDING: Device-specific screen capture and MP4 playback tests.
 - PENDING: Audio synchronization/muxing and touch/gamepad controls.
 - No APK export, native Android clipboard, or device validation is claimed by this addition.
+
+
+## Direct playable Pygame + MP4 build
+
+A Pygame implementation is included for a direct capture path that uses the existing FFmpeg recorder:
+
+```bash
+cd ~/HOLOOS
+python -m pip install pygame
+pkg install ffmpeg
+python examples/mn24_4d5d_game/playable_mp4.py
+```
+
+Press R to start/stop recording. The output is written to exports/MN24_4D5D_GAME.mp4. Press 4 or 5 to switch between 4D and 5D. The Pygame build records video without game audio. The Godot build is the native 3D-engine prototype; use platform screen capture for its MP4 recording.
