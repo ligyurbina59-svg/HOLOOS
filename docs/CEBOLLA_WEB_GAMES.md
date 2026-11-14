@@ -25,10 +25,10 @@ Open `http://127.0.0.1:8000/app/games`.
 ## Routes
 - `GET /api/games/catalog`
 - `GET /api/games/status`
-- `GET /games/play/holochron`
-- `GET /games/play/signal-earth`
-- `GET /games/play/stormrunner-ragnarok`
-- `GET /games/play/pantheon-front`
+- `GET /api/games/play/holochron`
+- `GET /api/games/play/signal-earth`
+- `GET /api/games/play/stormrunner-ragnarok`
+- `GET /api/games/play/pantheon-front`
 - `/games/archives/{slug}/` is reserved for safely extracted archive assets; inspect each package and locate its actual entry HTML before publishing/launching.
 
 The game player uses an iframe sandbox. These source games use Canvas and inline JavaScript; the sandbox permits scripts and same-origin localStorage, but denies top-level navigation and popups.
