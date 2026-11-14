@@ -65,3 +65,11 @@ async def m_radio():
     if not file.is_file():
         return JSONResponse(status_code=404, content={"detail": "M-Radio UI file not found"})
     return FileResponse(file, media_type="text/html")
+
+
+@app.get("/app/appbuilder", include_in_schema=False)
+async def appbuilder_importer():
+    file = UI_DIR / "appbuilder-importer.html"
+    if not file.is_file():
+        return JSONResponse(status_code=404, content={"detail": "AppBuilder importer UI file not found"})
+    return FileResponse(file, media_type="text/html")
