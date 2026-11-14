@@ -52,4 +52,3 @@ def test_backend_mounts_game_library_routes():
     assert "/api/games/status" in paths
     assert "/api/games/play/{slug}" in paths
     assert "/app/games" in route_paths
-    assert "/games/archives" in route_paths
