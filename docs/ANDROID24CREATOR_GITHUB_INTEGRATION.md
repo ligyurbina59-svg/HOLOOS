@@ -77,6 +77,21 @@ Endpoints:
 
 Optional query parameters: `repository=owner/name`, `ref=branch-or-tag`. Only repositories in `GITHUB_REPOSITORY_ALLOWLIST` are accepted.
 
+## Termux local runtime
+
+The repository includes a minimal FastAPI entry point at `android24creator_backend/main.py`, a Termux setup script, and a launcher. From the cloned repository root in Termux:
+
+```bash
+bash termux/setup.sh
+bash termux/run.sh
+```
+
+Open `http://127.0.0.1:8000/app/github-manager`. Check `http://127.0.0.1:8000/health` and `http://127.0.0.1:8000/docs`. The default bind address is loopback only; do not set `HOST=0.0.0.0` on an untrusted network. The bridge can read public HOLOOS data without a token. If needed, configure a fine-grained GitHub token as a Termux environment variable; never paste it into the HTML or commit it.
+
+## Universal Project Importer
+
+`GET /api/integrations/github/project/inspect?repository=ligyurbina59-svg/HOLOOS&ref=main` builds a JSON manifest from Git tree metadata. It estimates category and technology, lists up to 1,000 entries, and marks the result inspection-only. It does not download source files, run build scripts, install dependencies, or inspect binary contents. Treat category and technology as heuristic hints and review the manifest manually before import.
+
 ## AppBuilder browser UI
 
 A static, read-only browser interface is available at `android24creator/github-manager.html`. Serve it from the same origin as FastAPI (or configure CORS for a specific trusted origin). Set the API base URL in the UI if the backend is mounted elsewhere. It lists directories and opens UTF-8 text files; it never receives a GitHub token and never executes repository files.
