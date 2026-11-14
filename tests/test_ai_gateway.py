@@ -33,7 +33,7 @@ def test_chat_message_limits_content():
 def test_backend_mounts_mn24_routes():
     from android24creator_backend.main import app
 
-    paths = {route.path for route in app.routes}
+    paths = set(app.openapi()["paths"])
     assert "/api/ai/providers" in paths
     assert "/api/ai/chat" in paths
     assert "/api/integrations/github/project/inspect" in paths
