@@ -31,12 +31,12 @@ def test_chat_message_limits_content():
 
 
 def test_backend_mounts_mn24_routes():
-    from android24creator_backend.main import app
+    from android24creator_backend.main import UI_DIR, app
 
     paths = set(app.openapi()["paths"])
     assert "/api/ai/providers" in paths
     assert "/api/ai/chat" in paths
     assert "/api/integrations/github/project/inspect" in paths
-    assert "/app/expansion" in paths
-    assert "/app/m-radio" in paths
-    assert "/app/appbuilder" in paths
+    assert (UI_DIR / "expansion.html").is_file()
+    assert (UI_DIR / "m-radio-control.html").is_file()
+    assert (UI_DIR / "appbuilder-importer.html").is_file()
