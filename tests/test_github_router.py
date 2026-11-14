@@ -59,5 +59,9 @@ def test_project_inspection_builds_safe_manifest(monkeypatch):
 
 def test_project_inspection_rejects_invalid_ref():
     with pytest.raises(HTTPException) as error:
-        asyncio.run(github_router.inspect_project(ref="../main"))
+        asyncio.run(github_router.inspect_project(
+            repository="ligyurbina59-svg/HOLOOS",
+            ref="../main",
+            path="",
+        ))
     assert error.value.status_code == 400
