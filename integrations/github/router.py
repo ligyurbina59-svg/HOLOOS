@@ -72,6 +72,77 @@ async def github_bridge_health() -> dict[str, Any]:
     }
 
 
+@router.get("/project/inspect")
+async def inspect_project(
+    repository: str = Query(DEFAULT_REPOSITORY, min_length=3, max_length=200),
+    ref: str = Query("main", min_length=1, max_length=200),
+    path: str = Query("", max_length=500),
+) -> dict[str, Any]:
+    """Build a safe project manifest from Git tree metadata; never downloads or executes files."""
+    repo = _repository(repository)
+    if any(ch in ref for ch in ("..", "\\\\", "?", "#")):
+        raise HTTPException(status_code=400, detail="Invalid Git reference")
+    prefix = _safe_path(path) if path else ""
+    url = f"{API_ROOT}/repos/{repo}/git/trees/{quote(ref, safe='')}?recursive=1"
+    payload = await _get_github(url)
+    if not isinstance(payload, dict) or not isinstance(payload.get("tree"), list):
+        raise HTTPException(status_code=502, detail="GitHub returned an invalid Git tree")
+    entries = []
+    for node in payload["tree"]:
+        node_path = node.get("path", "")
+        if prefix and not (node_path == prefix or node_path.startswith(prefix + "/")):
+            continue
+        relative = node_path[len(prefix):].lstrip("/") if prefix else node_path
+        if not relative:
+            continue
+        entries.append({"path": relative, "type": node.get("type"), "size": node.get("size")})
+    entries = entries[:1000]
+    names = {item["path"].lower() for item in entries if item["type"] == "blob"}
+    extensions = {PurePosixPath(name).suffix for name in names}
+    if "package.json" in names or any(name.endswith((".tsx", ".jsx", ".ts", ".js")) for name in names):
+        technology = "JavaScript/TypeScript"
+    elif "pyproject.toml" in names or "requirements.txt" in names or any(name.endswith(".py") for name in names):
+        technology = "Python"
+    elif any(name.endswith((".glb", ".gltf", ".fbx", ".blend")) for name in names):
+        technology = "3D / digital assets"
+    elif any(name.endswith((".mp4", ".webm", ".mov", ".wav", ".mp3")) for name in names):
+        technology = "Multimedia"
+    else:
+        technology = "Undetermined"
+    if "androidmanifest.xml" in names or "build.gradle" in names or "settings.gradle" in names:
+        category = "android_app"
+    elif any(name.endswith((".glb", ".gltf", ".fbx", ".blend")) for name in names):
+        category = "3d_product"
+    elif any(name.endswith((".mp4", ".webm", ".mov", ".wav", ".mp3")) for name in names):
+        category = "multimedia"
+    elif any(name.endswith((".unity", ".godot")) or "/scenes/" in name for name in names):
+        category = "game"
+    elif "package.json" in names or "pyproject.toml" in names or "requirements.txt" in names:
+        category = "software"
+    else:
+        category = "unclassified"
+    manifest = {
+        "schema_version": "1.0",
+        "source": {"provider": "github", "repository": repo, "ref": ref, "path": prefix or "."},
+        "project": {
+            "name": (prefix.split("/")[-1] if prefix else repo.split("/")[-1]),
+            "category": category,
+            "technology_hint": technology,
+            "file_count": len(entries),
+            "extensions": sorted(extensions),
+        },
+        "files": entries,
+        "safety": {
+            "inspection_only": True,
+            "files_downloaded": False,
+            "code_executed": False,
+            "manual_review_required": True,
+            "tree_truncated_by_github": bool(payload.get("truncated")),
+            "manifest_entry_limit": 1000,
+        },
+    }
+    return manifest
+
 @router.get("/repository")
 async def repository_metadata(
     repository: str = Query(DEFAULT_REPOSITORY, min_length=3, max_length=200),
