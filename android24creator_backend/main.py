@@ -100,3 +100,18 @@ async def game_library():
     if not file.is_file():
         return JSONResponse(status_code=404, content={"detail": "Game library UI file not found"})
     return FileResponse(file, media_type="text/html")
+
+@app.get("/app/clipboard", include_in_schema=False)
+async def clipboard_demo():
+    file = UI_DIR / "clipboard.html"
+    if not file.is_file():
+        return JSONResponse(status_code=404, content={"detail": "Clipboard UI file not found"})
+    return FileResponse(file, media_type="text/html")
+
+
+@app.get("/app/clipboard.js", include_in_schema=False)
+async def clipboard_script():
+    file = UI_DIR / "clipboard.js"
+    if not file.is_file():
+        return JSONResponse(status_code=404, content={"detail": "Clipboard script file not found"})
+    return FileResponse(file, media_type="application/javascript")
