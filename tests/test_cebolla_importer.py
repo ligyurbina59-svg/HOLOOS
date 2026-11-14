@@ -8,8 +8,11 @@ from integrations.cebolla_importer import router as importer
 
 @pytest.mark.anyio
 async def test_status_reports_not_imported_when_directory_missing(tmp_path, monkeypatch):
-    monkeypatch.setattr(importer, "IMPORT_DIR", tmp_path / "Cebolla")
-    monkeypatch.setattr(importer, "MANIFEST", tmp_path / "Cebolla" / ".mn24-import-manifest.json")
+    root = tmp_path / "imports" / "Cebolla"
+    monkeypatch.setattr(importer, "ROOT", tmp_path)
+    monkeypatch.setattr(importer, "ROOT", tmp_path)
+    monkeypatch.setattr(importer, "IMPORT_DIR", root)
+    monkeypatch.setattr(importer, "MANIFEST", root / ".mn24-import-manifest.json")
     result = await importer.status()
     assert result["imported"] is False
     assert result["repository"] == "ligyurbina59-svg/Cebolla"
@@ -25,6 +28,7 @@ async def test_status_reads_import_manifest(tmp_path, monkeypatch):
         "file_count": 94,
         "total_bytes": 24662577,
     }), encoding="utf-8")
+    monkeypatch.setattr(importer, "ROOT", tmp_path)
     monkeypatch.setattr(importer, "IMPORT_DIR", root)
     monkeypatch.setattr(importer, "MANIFEST", manifest)
     result = await importer.status()
