@@ -6,3 +6,7 @@
 
 [node name="Tesseract4D" type="Node3D" parent="."]
 script = ExtResource("1_tesseract")
+
+[node name="Camera3D" type="Camera3D" parent="."]
+position = Vector3(0, 0, 8)
+current = true
