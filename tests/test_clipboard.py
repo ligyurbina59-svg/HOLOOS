@@ -38,7 +38,7 @@ class ClipboardTests(unittest.TestCase):
 
     def test_copy_and_paste_utf8(self):
         MN24Clipboard.copy_text("Hola, mundo 🌎")
-        self.assertEqual(self.scrap.payload, "Hola, mundo 🌎".encode("utf-8") + b"\\0")
+        self.assertEqual(self.scrap.payload, "Hola, mundo 🌎".encode("utf-8") + b"\0")
         self.assertEqual(MN24Clipboard.paste_text(), "Hola, mundo 🌎")
 
     def test_empty_clipboard(self):
