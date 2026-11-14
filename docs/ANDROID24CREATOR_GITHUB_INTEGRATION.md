@@ -65,7 +65,7 @@ app.include_router(github_router, prefix="/api")
 Run locally:
 
 ```bash
-uvicorn main:app --host 127.0.0.1 --port 8000
+bash termux/run.sh
 ```
 
 Endpoints:
@@ -74,6 +74,7 @@ Endpoints:
 - `GET /api/integrations/github/repository`
 - `GET /api/integrations/github/contents?path=`
 - `GET /api/integrations/github/file?path=README.md`
+- `GET /api/integrations/github/project/inspect?ref=main`
 
 Optional query parameters: `repository=owner/name`, `ref=branch-or-tag`. Only repositories in `GITHUB_REPOSITORY_ALLOWLIST` are accepted.
 
@@ -105,7 +106,7 @@ python -m pip install pytest
 pytest -q
 ```
 
-The included tests cover repository allowlisting and path validation. They are not a substitute for API integration tests against a configured GitHub token.
+The included tests cover repository allowlisting, path validation, safe Git reference validation and manifest generation. CI is configured to run them on pushes to the feature branch and pull requests to `main`. The CI workflow has not yet been observed running successfully.
 
 ## Security controls and required production work
 
@@ -135,7 +136,8 @@ Before public deployment:
 
 - **IMPLEMENTED:** isolated read-only bridge source and this integration plan committed on a feature branch.
 - **VERIFIED:** GitHub repository metadata, default branch and selected text files inspected through the connected GitHub integration.
-- **PENDING:** install dependencies, mount router in the actual AppBuilder backend, configure server secret, connect UI, execute tests, configure CI, deploy.
+- **IMPLEMENTED:** Termux FastAPI entry point, local UI route, setup/launcher scripts, project tree inspection endpoint, and GitHub Actions test workflow are committed on the feature branch.
+- **PENDING:** install on the user’s Termux device, configure optional server-side token, execute tests locally or observe a passing CI run, import source files into a selected AppBuilder project, deploy.
 - **NOT VERIFIED:** APK contents, ZIP contents, runtime behavior, build reproducibility, security scan and production deployment.
 
 Do not merge this branch or enable write operations until the pending checks are completed.
