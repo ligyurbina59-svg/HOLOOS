@@ -80,11 +80,17 @@ async def inspect_project(
 ) -> dict[str, Any]:
     """Build a safe project manifest from Git tree metadata; never downloads or executes files."""
     repo = _repository(repository)
-    if any(ch in ref for ch in ("..", "\\\\", "?", "#")):
+    if any(ch in ref for ch in ("..", "\\", "?", "#")):
         raise HTTPException(status_code=400, detail="Invalid Git reference")
     prefix = _safe_path(path) if path else ""
-    url = f"{API_ROOT}/repos/{repo}/git/trees/{quote(ref, safe='')}?recursive=1"
-    payload = await _get_github(url)
+    branch_data = await _get_github(f"{API_ROOT}/repos/{repo}/branches/{quote(ref, safe='')}")
+    tree_sha = (
+        branch_data.get("commit", {}).get("commit", {}).get("tree", {}).get("sha")
+        if isinstance(branch_data, dict) else None
+    )
+    if not tree_sha:
+        raise HTTPException(status_code=502, detail="GitHub did not return a branch tree SHA")
+    payload = await _get_github(f"{API_ROOT}/repos/{repo}/git/trees/{quote(tree_sha, safe='')}?recursive=1")
     if not isinstance(payload, dict) or not isinstance(payload.get("tree"), list):
         raise HTTPException(status_code=502, detail="GitHub returned an invalid Git tree")
     entries = []
