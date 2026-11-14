@@ -44,7 +44,8 @@ async def catalog() -> dict:
         archives.append({
             **item, "type": "zip_source", "available": source_present,
             "extracted": extracted,
-            "launch_url": f"/games/archives/{item['id']}/" if extracted else None,
+            "launch_url": None,
+            "review_required": extracted,
         })
     return {
         "source_repository": "ligyurbina59-svg/Cebolla",
