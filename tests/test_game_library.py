@@ -41,3 +41,15 @@ async def test_play_requires_imported_file(tmp_path, monkeypatch):
     with pytest.raises(HTTPException) as error:
         await games.play_game("holochron")
     assert error.value.status_code == 404
+
+
+def test_backend_mounts_game_library_routes():
+    from android24creator_backend.main import app
+
+    paths = set(app.openapi()["paths"])
+    route_paths = {getattr(route, "path", None) for route in app.routes}
+    assert "/api/games/catalog" in paths
+    assert "/api/games/status" in paths
+    assert "/games/play/{slug}" in paths
+    assert "/app/games" in route_paths
+    assert "/games/archives" in route_paths
