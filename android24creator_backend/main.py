@@ -13,6 +13,7 @@ from integrations.github.router import router as github_router
 from integrations.ai_gateway.router import router as ai_router
 from integrations.cebolla_importer.router import router as cebolla_router
 from integrations.game_library.router import router as game_router
+from integrations.mn24_live.router import router as live_router
 
 ROOT = Path(__file__).resolve().parents[1]
 UI_DIR = ROOT / "android24creator"
@@ -38,6 +39,7 @@ app.include_router(github_router, prefix="/api")
 app.include_router(ai_router, prefix="/api")
 app.include_router(cebolla_router, prefix="/api")
 app.include_router(game_router, prefix="/api")
+app.include_router(live_router, prefix="/api")
 app.mount("/assets", StaticFiles(directory=str(ASSET_DIR), check_dir=False), name="assets")
 app.mount(
     "/projects/cebolla",
