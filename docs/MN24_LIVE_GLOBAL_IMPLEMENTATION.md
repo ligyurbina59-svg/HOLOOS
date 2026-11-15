@@ -37,7 +37,7 @@ Independent MN24 Labs social-live product. BIGO LIVE is a feature reference only
 - JWT validation is fail-closed; secret must be at least 32 characters.
 - LiveKit API secret remains backend-only. Never place it in HTML, JavaScript, APK assets or Git.
 - Token endpoint checks room ownership for publisher grants.
-- WebSocket chat requires an app JWT, validates room IDs, limits message length and applies per-connection throttling.
+- WebSocket chat requires an app JWT, validates room IDs, limits message length and applies per-connection throttling. Query-string JWTs should be short-lived and redacted from reverse-proxy access logs.
 - Camera/microphone/screen capture require explicit browser permission. Production access requires HTTPS (localhost is suitable for local development).
 - Add production identity/session revocation, account age eligibility, report/block persistence, human moderation, rate limits across nodes, abuse monitoring, privacy retention/deletion and payment compliance before public launch.
 
