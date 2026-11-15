@@ -16,6 +16,7 @@ from integrations.game_library.router import router as game_router
 
 ROOT = Path(__file__).resolve().parents[1]
 UI_DIR = ROOT / "android24creator"
+ASSET_DIR = ROOT / "assets"
 CEBOLLA_DIR = ROOT / "imports" / "Cebolla"
 app = FastAPI(title="Android24Creator Local Backend", version="0.3.0")
 origins = [
@@ -37,6 +38,7 @@ app.include_router(github_router, prefix="/api")
 app.include_router(ai_router, prefix="/api")
 app.include_router(cebolla_router, prefix="/api")
 app.include_router(game_router, prefix="/api")
+app.mount("/assets", StaticFiles(directory=str(ASSET_DIR), check_dir=False), name="assets")
 app.mount(
     "/projects/cebolla",
     StaticFiles(directory=str(CEBOLLA_DIR), html=True, check_dir=False),
@@ -115,3 +117,11 @@ async def clipboard_script():
     if not file.is_file():
         return JSONResponse(status_code=404, content={"detail": "Clipboard script file not found"})
     return FileResponse(file, media_type="application/javascript")
+
+
+@app.get("/app/reality-4d", include_in_schema=False)
+async def reality_4d():
+    file = UI_DIR / "reality-4d.html"
+    if not file.is_file():
+        return JSONResponse(status_code=404, content={"detail": "MN24 Reality 4D page not found"})
+    return FileResponse(file, media_type="text/html")
