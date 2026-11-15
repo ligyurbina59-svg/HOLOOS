@@ -11,6 +11,8 @@ import re
 import sqlite3
 import time
 from collections import defaultdict
+from contextlib import contextmanager
+from urllib.parse import urlsplit
 from pathlib import Path
 from typing import Any
 
@@ -68,23 +70,30 @@ class ChatHub:
 chat_hub = ChatHub()
 
 
-def _db() -> sqlite3.Connection:
+@contextmanager
+def _db():
     DB_PATH.parent.mkdir(parents=True, exist_ok=True)
     conn = sqlite3.connect(DB_PATH, timeout=10)
     conn.row_factory = sqlite3.Row
-    conn.execute("""
-        CREATE TABLE IF NOT EXISTS live_rooms (
-            room_id TEXT PRIMARY KEY,
-            title TEXT NOT NULL,
-            category TEXT NOT NULL,
-            language TEXT NOT NULL,
-            owner TEXT NOT NULL,
-            status TEXT NOT NULL DEFAULT 'scheduled',
-            created_at INTEGER NOT NULL
-        )
-    """)
-    conn.commit()
-    return conn
+    try:
+        conn.execute("""
+            CREATE TABLE IF NOT EXISTS live_rooms (
+                room_id TEXT PRIMARY KEY,
+                title TEXT NOT NULL,
+                category TEXT NOT NULL,
+                language TEXT NOT NULL,
+                owner TEXT NOT NULL,
+                status TEXT NOT NULL DEFAULT 'scheduled',
+                created_at INTEGER NOT NULL
+            )
+        """)
+        yield conn
+        conn.commit()
+    except Exception:
+        conn.rollback()
+        raise
+    finally:
+        conn.close()
 
 
 def _b64url_decode(value: str) -> bytes:
@@ -200,6 +209,18 @@ async def room_chat(websocket: WebSocket, room_id: str, token: str = Query(defau
     if not ROOM_RE.fullmatch(room_id):
         await websocket.close(code=1008, reason="Invalid room")
         return
+    origin = websocket.headers.get("origin")
+    if origin:
+        origin_host = urlsplit(origin).netloc
+        request_host = websocket.headers.get("host", "")
+        allowed = {
+            item.strip()
+            for item in os.getenv("CORS_ALLOWED_ORIGINS", "http://localhost:8000,http://127.0.0.1:8000").split(",")
+            if item.strip()
+        }
+        if origin_host != request_host and origin not in allowed:
+            await websocket.close(code=1008, reason="Origin not allowed")
+            return
     try:
         claims = verify_app_jwt(token)
     except HTTPException:
