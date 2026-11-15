@@ -125,3 +125,11 @@ async def reality_4d():
     if not file.is_file():
         return JSONResponse(status_code=404, content={"detail": "MN24 Reality 4D page not found"})
     return FileResponse(file, media_type="text/html")
+
+
+@app.get("/app/live", include_in_schema=False)
+async def live_global():
+    file = UI_DIR / "live.html"
+    if not file.is_file():
+        return JSONResponse(status_code=404, content={"detail": "MN24 Live Global page not found"})
+    return FileResponse(file, media_type="text/html")
