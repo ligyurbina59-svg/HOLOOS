@@ -52,3 +52,25 @@ def test_tampered_app_jwt_rejected(monkeypatch):
     with pytest.raises(HTTPException) as error:
         verify_app_jwt(jwt + "tampered")
     assert error.value.status_code == 401
+
+from fastapi import FastAPI
+from fastapi.testclient import TestClient
+
+from integrations.mn24_live.router import router, current_user
+
+def test_room_create_and_duplicate(tmp_path, monkeypatch):
+    import integrations.mn24_live.router as live
+    monkeypatch.setattr(live, "DB_PATH", tmp_path / "live.sqlite3")
+    app = FastAPI()
+    app.include_router(router, prefix="/api")
+    app.dependency_overrides[current_user] = lambda: {"sub": "demo_user"}
+    client = TestClient(app)
+    payload = {"room_id": "mn24-demo", "title": "MN24 Demo Live", "category": "gaming", "language": "es"}
+    created = client.post("/api/live/rooms", json=payload)
+    assert created.status_code == 201
+    assert created.json()["owner"] == "demo_user"
+    duplicate = client.post("/api/live/rooms", json=payload)
+    assert duplicate.status_code == 409
+    listed = client.get("/api/live/rooms")
+    assert listed.status_code == 200
+    assert listed.json()["rooms"][0]["room_id"] == "mn24-demo"
