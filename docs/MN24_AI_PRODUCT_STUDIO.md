@@ -90,4 +90,9 @@ Open `http://127.0.0.1:8000/app/product-studio` and API docs at `http://127.0.0.
 - PENDIENTE: runtime, provider, device, security, deployment or integration work not yet verified.
 - PROPUESTO: future architecture or feature not yet present in source.
 
-No production deployment, Android APK, live model generation, or successful test run is claimed by this document.
+## Validation evidence
+
+GitHub Actions run: https://github.com/ligyurbina59-svg/HOLOOS/actions/runs/44301356617  
+Result: `compileall` passed; `pytest -q` passed with **44 passed, 1 warning** in 0.59s. This validates the repository on the GitHub-hosted Ubuntu/Python 3.12 runner only. Termux runtime, browser accessibility, Android WebView/device behavior, signed APK generation, live model generation, production deployment and security/load testing remain PENDING.
+
+No production deployment, Android APK, or live model generation is claimed.
