@@ -1,0 +1,41 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#07111f"><meta name="description" content="MN24 AI Product Studio para Android24Creator AppBuilder">
+<link rel="manifest" href="/app/product-studio.webmanifest"><title>MN24 AI Product Studio</title>
+<style>
+:root{color-scheme:dark;font-family:Inter,system-ui,sans-serif;background:#07111f;color:#eaf2ff}*{box-sizing:border-box}body{margin:0;background:radial-gradient(circle at 10% 0,#15395e,#07111f 55%);min-height:100vh}main{max-width:1100px;margin:auto;padding:24px 16px}.muted{color:#a6bad2}.eyebrow{letter-spacing:.13em;color:#69d9c4;font-size:.75rem}.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:12px}.card{background:#102138;border:1px solid #294766;border-radius:15px;padding:16px}h1{margin:.3rem 0;color:#b9e0ff}label{display:block;margin:12px 0 5px}input,textarea,select{width:100%;padding:11px;border:1px solid #385878;border-radius:9px;background:#09182a;color:#fff}button{border:0;border-radius:9px;padding:11px 16px;background:#167d83;color:white;font-weight:650;cursor:pointer}button:disabled{opacity:.5}pre{white-space:pre-wrap;overflow-wrap:anywhere;background:#081727;border:1px solid #294766;border-radius:10px;padding:12px;max-height:480px;overflow:auto}.pill{font-size:.75rem;color:#f0d48e}.toplink{color:#a8d8ff}small{color:#a6bad2}
+</style></head><body><main>
+<p class="eyebrow">MN24 LABS · ANDROID24CREATOR APPBUILDER</p><h1>AI PRODUCT STUDIO</h1>
+<p class="muted">Idea → especificación → UX → desarrollo → pruebas → publicación. MVP determinista: la generación real de código y el despliegue siguen pendientes.</p>
+<p><a class="toplink" href="/app/expansion">← Volver a MN24 Global Expansion</a></p>
+<div class="grid" id="engines">
+<article class="card"><h3>Lovable-inspired Builder</h3><p class="muted">Prompt-to-app blueprint; generación ejecutable pendiente.</p><span class="pill">SIMULADO</span></article>
+<article class="card"><h3>MN24 Vibe Coding</h3><p class="muted">Convierte requisitos en tareas de implementación revisables.</p><span class="pill">IMPLEMENTADO</span></article>
+<article class="card"><h3>UX/UI Design Studio</h3><p class="muted">Wireframes, design tokens, componentes y accesibilidad.</p><span class="pill">IMPLEMENTADO</span></article>
+<article class="card"><h3>User-Centered Design</h3><p class="muted">Investigación, journeys y pruebas de usabilidad.</p><span class="pill">IMPLEMENTADO</span></article>
+<article class="card"><h3>MN24 Value Investing</h3><p class="muted">Escenarios DCF, VAN y margen de seguridad.</p><span class="pill">IMPLEMENTADO</span></article>
+<article class="card"><h3>AI Testing & Deployment</h3><p class="muted">Plan de calidad y lista de publicación.</p><span class="pill">PENDIENTE · pipeline real</span></article>
+</div>
+<section class="card" style="margin-top:14px"><h2>1 · Crear especificación con IA</h2>
+<label for="name">Nombre del producto</label><input id="name" maxlength="80" value="MN24 Demo App">
+<label for="desc">¿Qué quieres construir?</label><textarea id="desc" rows="3" maxlength="4000">Una aplicación para crear prototipos digitales desde instrucciones en lenguaje natural.</textarea>
+<label for="users">Usuarios objetivo</label><input id="users" maxlength="500" value="Desarrolladores independientes y pequeñas empresas">
+<label for="platforms">Plataformas</label><select id="platforms"><option value="web,android,pwa">Web + Android + PWA</option><option value="web,pwa">Web + PWA</option><option value="android">Android</option></select>
+<label for="budget">Presupuesto máximo (USD)</label><input id="budget" type="number" min="1" max="100" value="100">
+<p><button id="makePlan">Generar blueprint</button></p><pre id="plan" aria-live="polite">El blueprint aparecerá aquí.</pre>
+</section>
+<section class="card" style="margin-top:14px"><h2>2 · Value Investing — escenario DCF</h2>
+<div class="grid"><div><label for="investment">Inversión inicial USD</label><input id="investment" type="number" min="1" value="100"></div><div><label for="discount">Tasa de descuento (ej. 0.10)</label><input id="discount" type="number" min="0.001" max="1" step="0.01" value="0.10"></div><div><label for="growth">Crecimiento terminal (ej. 0.02)</label><input id="growth" type="number" min="0" max="0.99" step="0.01" value="0.02"></div></div>
+<label for="cashflows">Flujos de caja anuales, separados por coma</label><input id="cashflows" value="40,50,60"><p><button id="evaluate">Calcular escenario</button></p><pre id="finance" aria-live="polite">Resultados ilustrativos; no son asesoramiento financiero.</pre>
+</section>
+<section class="card" style="margin-top:14px"><h2>3 · Pruebas y publicación</h2><button id="qa">Consultar checklist</button><pre id="qaResult" aria-live="polite">Las pruebas y el despliegue reales no se han ejecutado.</pre></section>
+<p class="muted"><small>Seguridad: no se ejecuta código generado, no se guardan claves API en el navegador y no se publica automáticamente. El cálculo financiero depende de supuestos introducidos por el usuario.</small></p>
+</main><script>
+const $=id=>document.getElementById(id);async function api(path,body){const r=await fetch(path,{method:body?'POST':'GET',headers:body?{'Content-Type':'application/json'}:{},body:body?JSON.stringify(body):undefined});const d=await r.json();if(!r.ok)throw new Error(d.detail||'Error API');return d}function show(id,value){$(id).textContent=JSON.stringify(value,null,2)}
+$('makePlan').onclick=async()=>{try{$('makePlan').disabled=true;show('plan',await api('/api/studio/plan',{product_name:$('name').value,description:$('desc').value,target_users:$('users').value,platforms:$('platforms').value.split(','),budget_usd:Number($('budget').value)}))}catch(e){$('plan').textContent=e.message}finally{$('makePlan').disabled=false}};
+$('evaluate').onclick=async()=>{try{const flows=$('cashflows').value.split(',').map(x=>Number(x.trim()));if(flows.some(x=>!Number.isFinite(x)))throw new Error('Flujos de caja inválidos');show('finance',await api('/api/studio/finance/evaluate',{initial_investment:Number($('investment').value),annual_cash_flows:flows,discount_rate:Number($('discount').value),terminal_growth_rate:Number($('growth').value)}))}catch(e){$('finance').textContent=e.message}};
+$('qa').onclick=async()=>{try{show('qaResult',await api('/api/studio/qa/checklist'))}catch(e){$('qaResult').textContent=e.message}};
+if('serviceWorker'in navigator){window.addEventListener('load',()=>navigator.serviceWorker.register('/app/product-studio-sw.js').catch(()=>{}))}
+</script></body></html>
