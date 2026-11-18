@@ -14,6 +14,7 @@ from integrations.ai_gateway.router import router as ai_router
 from integrations.cebolla_importer.router import router as cebolla_router
 from integrations.game_library.router import router as game_router
 from integrations.mn24_live.router import router as live_router
+from integrations.product_studio.router import router as product_studio_router
 
 ROOT = Path(__file__).resolve().parents[1]
 UI_DIR = ROOT / "android24creator"
@@ -40,6 +41,7 @@ app.include_router(ai_router, prefix="/api")
 app.include_router(cebolla_router, prefix="/api")
 app.include_router(game_router, prefix="/api")
 app.include_router(live_router, prefix="/api")
+app.include_router(product_studio_router, prefix="/api")
 app.mount("/assets", StaticFiles(directory=str(ASSET_DIR), check_dir=False), name="assets")
 app.mount(
     "/projects/cebolla",
@@ -135,3 +137,27 @@ async def live_global():
     if not file.is_file():
         return JSONResponse(status_code=404, content={"detail": "MN24 Live Global page not found"})
     return FileResponse(file, media_type="text/html")
+
+
+@app.get("/app/product-studio", include_in_schema=False)
+async def product_studio():
+    file = UI_DIR / "product-studio.html"
+    if not file.is_file():
+        return JSONResponse(status_code=404, content={"detail": "MN24 Product Studio UI file not found"})
+    return FileResponse(file, media_type="text/html")
+
+
+@app.get("/app/product-studio.webmanifest", include_in_schema=False)
+async def product_studio_manifest():
+    file = UI_DIR / "product-studio.webmanifest"
+    if not file.is_file():
+        return JSONResponse(status_code=404, content={"detail": "MN24 Product Studio manifest not found"})
+    return FileResponse(file, media_type="application/manifest+json")
+
+
+@app.get("/app/product-studio-sw.js", include_in_schema=False)
+async def product_studio_service_worker():
+    file = UI_DIR / "product-studio-sw.js"
+    if not file.is_file():
+        return JSONResponse(status_code=404, content={"detail": "MN24 Product Studio service worker not found"})
+    return FileResponse(file, media_type="application/javascript", headers={"Service-Worker-Allowed": "/app/"})
