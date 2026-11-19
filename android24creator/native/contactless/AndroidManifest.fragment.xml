@@ -1,0 +1,4 @@
+<!-- Merge these entries into the EXISTING AndroidManifest.xml; do not replace the manifest. -->
+<uses-permission android:name="android.permission.NFC" />
+<uses-feature android:name="android.hardware.nfc" android:required="false" />
+<!-- NFC reader/writer mode only. Do not add HostApduService / payment AIDs here. -->
