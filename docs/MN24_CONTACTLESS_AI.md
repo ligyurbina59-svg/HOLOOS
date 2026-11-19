@@ -14,7 +14,7 @@ Target device: Honor Android (model and Android version must be checked on-devic
 - Native Android NFC NDEF reader/writer sample for HTTPS handoff URLs.
 - Tests for one-time redemption, URL validation, QR generation and disabled payment state.
 
-The router reuses the existing `MN24_APP_JWT_SECRET` HS256 verifier from MN24 Live. Set a random secret of at least 32 characters in the server environment. The browser does not persist the access token. QR generation sends the one-time token in a POST body; the QR encodes it in a URL fragment so it is not sent in the initial HTTP request.
+The router reuses the existing `MN24_APP_JWT_SECRET` HS256 verifier from MN24 Live. Configure the same random secret (at least 32 characters) in both the existing MN24 JWT issuer and this backend as `MN24_APP_JWT_SECRET`. This repository contains the verifier but does not establish a user-login/token-issuing screen for Contactless AI; obtain the Bearer JWT from the existing authenticated MN24 session. Do not invent a production token issuer or use a development token in production. The browser does not persist the access token. QR generation sends the one-time token in a POST body; the QR encodes it in a URL fragment so it is not sent in the initial HTTP request.
 
 ## API
 
@@ -52,7 +52,7 @@ export MN24_APP_JWT_SECRET="$(python -c 'import secrets; print(secrets.token_url
 bash termux/run.sh
 ```
 
-Open `http://127.0.0.1:8000/app/contactless`. Obtain a valid app JWT from the existing authentication service; the contactless page does not issue credentials. Keep the server bound to loopback. Do not expose this prototype to public networks.
+Open `http://127.0.0.1:8000/app/contactless`. Obtain a valid app JWT from the existing authentication service; the contactless page does not issue credentials. Loopback mode is local development only: a second phone cannot reach the sender's `127.0.0.1`. For device-to-device QR redemption, deploy the backend on a trusted HTTPS host reachable by both devices and configure the reverse proxy correctly. Do not expose the Termux development server directly to public networks.
 
 If you need to retain the secret across terminal sessions, store it in a local ignored environment file with permissions 600; never commit it. The existing project authentication must issue compatible HS256 JWTs using this same secret. Do not create a second identity system.
 
