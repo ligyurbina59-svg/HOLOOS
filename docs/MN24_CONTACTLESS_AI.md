@@ -14,13 +14,13 @@ Target device: Honor Android (model and Android version must be checked on-devic
 - Native Android NFC NDEF reader/writer sample for HTTPS handoff URLs.
 - Tests for one-time redemption, URL validation, QR generation and disabled payment state.
 
-The router reuses the existing `MN24_APP_JWT_SECRET` HS256 verifier from MN24 Live. Set a random secret of at least 32 characters in the server environment. The browser does not persist the access token.
+The router reuses the existing `MN24_APP_JWT_SECRET` HS256 verifier from MN24 Live. Set a random secret of at least 32 characters in the server environment. The browser does not persist the access token. QR generation sends the one-time token in a POST body; the QR encodes it in a URL fragment so it is not sent in the initial HTTP request.
 
 ## API
 
 - `GET /api/contactless/health`
 - `POST /api/contactless/handoffs` — authenticated; JSON: `{"kind":"text","content":"hello","expires_in":180}`
-- `GET /api/contactless/handoffs/{handoff_id}/qr?token=...` — authenticated owner only; returns SVG QR
+- `POST /api/contactless/handoffs/{handoff_id}/qr` — authenticated owner only; token in JSON body, returns SVG QR — authenticated owner only; returns SVG QR
 - `POST /api/contactless/redeem` — authenticated recipient; JSON: `{"token":"..."}`; token is single-use
 - `GET /api/contactless/payments/capabilities`
 - `POST /api/contactless/payments/intents` — deliberately disabled (503)
@@ -29,7 +29,7 @@ The router reuses the existing `MN24_APP_JWT_SECRET` HS256 verifier from MN24 Li
 
 This implementation does NOT accept card numbers, bank credentials, PAN, CVV, PINs, payment tokens or money. It does not move funds, emulate a payment card, or connect to a bank. Payment capability reports disabled. A production wallet/payment module needs a licensed/acquiring payment provider, merchant onboarding, tokenization, supported country/rail checks, webhook signature verification, idempotency, reconciliation, fraud controls and legal/compliance review. Never store raw card data.
 
-NFC in this implementation is NDEF reader/writer for short HTTPS handoff links. It is not EMV contactless payment, HCE wallet emulation, Android default wallet integration, or peer-to-peer Android Beam. Android Beam is deprecated. NFC hardware and OS behavior vary by Honor model/region; test adapter presence, NFC enabled state, NDEF tag support and permissions on the actual device. QR remains the fallback.
+NFC in this implementation is NDEF tag reader/writer for short HTTPS handoff links. It does not provide direct phone-to-phone NFC exchange: Android Beam is deprecated and HCE is not implemented. It is not EMV contactless payment, HCE wallet emulation, or Android default wallet integration. NFC hardware and OS behavior vary by Honor model/region; test adapter presence, NFC enabled state, NDEF tag support and permissions on the actual device. QR remains the cross-device fallback. TeleTransfer money movement and provider-backed wallet remain separate pending integrations.
 
 ## Honor Android native integration
 
