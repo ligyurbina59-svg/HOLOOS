@@ -7,7 +7,7 @@ import android.nfc.Tag
 import android.nfc.tech.Ndef
 import android.nfc.tech.NdefFormatable
 import android.os.Bundle
-import androidx.appcompat.app.AppCompatActivity
+import android.app.Activity
 import java.nio.charset.Charset
 
 /**
@@ -15,7 +15,7 @@ import java.nio.charset.Charset
  * This is for exchanging a short, non-sensitive handoff URL only.
  * It is NOT an EMV payment terminal, card emulator, or banking implementation.
  */
-class ContactlessNfcActivity : AppCompatActivity(), NfcAdapter.ReaderCallback {
+class ContactlessNfcActivity : Activity(), NfcAdapter.ReaderCallback {
     private var adapter: NfcAdapter? = null
     @Volatile private var pendingUrl: String? = null
 
