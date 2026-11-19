@@ -1,0 +1,53 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#07111f"><title>MN24 · Cebolla Project Import</title>
+<style>
+:root{color-scheme:dark;font-family:system-ui,sans-serif;background:#07111f;color:#e8f1ff}
+*{box-sizing:border-box}body{margin:0;background:radial-gradient(circle at 15% 0,#16385d,#07111f 55%);min-height:100vh}
+main{max-width:980px;margin:auto;padding:24px 16px}.muted{color:#9fb2ca}.panel{background:#101f32;border:1px solid #29435f;border-radius:15px;padding:16px;margin:14px 0}
+h1{color:#a8d8ff;margin:.2rem 0}.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:12px}
+.metric{font-size:1.7rem;font-weight:800;color:#8fe2d4}a{color:#a5d2ff}button{padding:11px 16px;background:#155c70;color:white;border:0;border-radius:9px;font:inherit}
+li{margin:8px 0;overflow-wrap:anywhere}.status{padding:10px;background:#071727;border-radius:9px;color:#f1d18b}
+</style></head>
+<body><main>
+<p class="muted">MN24 LABS · ANDROID24CREATOR APPBUILDER · UNIVERSAL IMPORT</p>
+<h1>CEBOLLA · FULL PROJECT IMPORT</h1>
+<p class="muted">Repositorio GitHub completo para Web y Android, con Termux como backend local.</p>
+<section class="panel">
+<h2>Estado local</h2><p id="status" class="status">Consultando el manifiesto de importación…</p>
+<div class="grid">
+<div><div class="metric" id="count">—</div><div class="muted">Archivos importados</div></div>
+<div><div class="metric" id="size">—</div><div class="muted">Tamaño total</div></div>
+<div><div class="metric" id="commit">—</div><div class="muted">Commit fuente</div></div>
+</div>
+<p><a href="https://github.com/ligyurbina59-svg/Cebolla" target="_blank" rel="noopener">Repositorio original Cebolla →</a></p>
+</section>
+<section class="panel"><h2>Contenido del proyecto</h2>
+<ul class="muted">
+<li>Aplicaciones Android APK (descarga manual; nunca se instalan automáticamente).</li>
+<li>Proyectos web HTML, imágenes, vídeos y archivos ZIP.</li>
+<li>ANÁLISIS VIRTUAL IA: FastAPI, interfaz web y requisitos Python.</li>
+<li>Manifiestos JSON, documentación y recursos multimedia.</li>
+</ul>
+<p><a href="/projects/cebolla/">Explorar archivos importados →</a></p>
+</section>
+<section class="panel"><h2>Integridad y seguridad</h2>
+<p class="muted">El importador crea un inventario SHA-256 y conserva el commit fuente. No ejecuta APK, ZIP, HTML ni scripts del repositorio. Revisa licencias, dependencias y contenido antes de publicar o instalar.</p>
+<p><a href="/api/cebolla/inventory">Consultar inventario JSON →</a></p>
+</section>
+<p><a href="/app/expansion">← MN24 Global Expansion</a></p>
+</main>
+<script>
+const $=id=>document.getElementById(id);
+(async()=>{
+ try{
+  const r=await fetch("/api/cebolla/status");const d=await r.json();if(!r.ok)throw new Error(d.detail||"API error");
+  if(!d.imported){$("status").textContent="PENDIENTE · Ejecuta bash termux/import-cebolla.sh en Termux.";return;}
+  $("status").textContent="IMPORTADO · Los archivos están disponibles en el servidor local.";
+  $("count").textContent=d.file_count;$("size").textContent=(d.total_bytes/1048576).toFixed(2)+" MB";
+  $("commit").textContent=(d.commit||"").slice(0,7);
+ }catch(e){$("status").textContent="No se pudo consultar el estado: "+e.message;}
+})();
+</script></body></html>

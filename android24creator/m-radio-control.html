@@ -1,0 +1,48 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#07111f"><title>MN24 M-Radio Control AI</title>
+<style>
+:root{color-scheme:dark;font-family:system-ui,sans-serif;background:#07111f;color:#e7f0ff}
+*{box-sizing:border-box}body{margin:0;background:radial-gradient(circle at 50% 0,#16355a,#07111f 55%);min-height:100vh}
+main{max-width:760px;margin:auto;padding:22px 16px}.muted{color:#9eb1c9;font-size:.9rem}
+.panel{background:#101e30;border:1px solid #2a4564;border-radius:16px;padding:16px;margin:14px 0}
+h1{color:#9bd0ff;margin:.2rem 0}h2{font-size:1rem;color:#a8d6ff}
+.grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+button,select{width:100%;padding:12px;border:1px solid #3b5b7e;border-radius:10px;background:#102b49;color:#e7f0ff;font:inherit}
+button:disabled{opacity:.45;cursor:not-allowed}.status{padding:10px;border-radius:9px;background:#071727;color:#f5d58b}
+.stick{width:120px;height:120px;border:2px solid #4677a8;border-radius:50%;display:grid;place-items:center;margin:auto;color:#a8d6ff}
+@media(max-width:520px){.grid{grid-template-columns:1fr}}
+</style></head>
+<body><main>
+<p class="muted">MN24 LABS · ANDROID24CREATOR · DEVICE CONTROL</p>
+<h1>M-RADIO CONTROL AI</h1>
+<p class="muted">Panel de mando para perfiles de juego, audio y comunicaciones compatibles.</p>
+<section class="panel">
+<h2>Estado del dispositivo</h2>
+<p id="status" class="status">NO CONECTADO · Puente Android HID pendiente.</p>
+<div class="grid">
+<div><label for="profile">Perfil</label><select id="profile"><option>Gamepad</option><option>Comunicaciones PTT</option><option>Multimedia</option><option>Accesibilidad</option></select></div>
+<div><label for="transport">Transporte</label><select id="transport"><option>Bluetooth HID</option><option>USB HID</option><option>Solo interfaz local</option></select></div>
+</div>
+</section>
+<section class="panel">
+<h2>Controles de prueba visual</h2>
+<div class="grid">
+<div class="stick">L · D-PAD</div><div class="stick">R · STICK</div>
+</div>
+<div class="grid" style="margin-top:14px">
+<button disabled title="Requiere puente nativo Android">A · Acción</button>
+<button disabled title="Requiere puente nativo Android">B · Cancelar</button>
+<button disabled title="Requiere puente nativo Android">PTT · Hablar</button>
+<button disabled title="Requiere puente nativo Android">VOL · Audio</button>
+</div>
+<p class="muted">Los controles físicos permanecen deshabilitados hasta implementar y autorizar el servicio Android Bluetooth/USB HID. Esta página no afirma haber conectado ningún dispositivo.</p>
+</section>
+<section class="panel">
+<h2>Seguridad y permisos</h2>
+<ul class="muted"><li>Emparejamiento explícito del dispositivo.</li><li>Permisos Android concedidos por el usuario.</li><li>Macros locales con confirmación.</li><li>Sin captura de audio ni transmisión en segundo plano por defecto.</li></ul>
+</section>
+<p><a href="/app/expansion" style="color:#9dccff">← Volver al centro MN24</a></p>
+</main></body></html>

@@ -1,0 +1,10 @@
+; MN24 Tesseract 4D demonstration project
+config_version=5
+
+[application]
+config/name="MN24 Tesseract 4D"
+run/main_scene="res://Main.tscn"
+
+[autoload]\nMN24Clipboard="*res://clipboard_manager.gd"\n\n[rendering]
+renderer/rendering_method="gl_compatibility"
+renderer/rendering_method.mobile="gl_compatibility"

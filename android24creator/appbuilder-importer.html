@@ -1,0 +1,52 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#07111f"><title>Android24Creator · Universal Project Importer</title>
+<style>
+:root{color-scheme:dark;font-family:system-ui,sans-serif;background:#07111f;color:#e7f0ff}
+*{box-sizing:border-box}body{margin:0;background:radial-gradient(circle at 15% 0,#15385c,#07111f 56%);min-height:100vh}
+main{max-width:1000px;margin:auto;padding:24px 16px}.muted{color:#9eb2ca}.panel{background:#101f32;border:1px solid #29435f;border-radius:15px;padding:16px;margin:14px 0}
+h1{color:#a8d8ff;margin:.2rem 0}.row{display:flex;gap:10px;flex-wrap:wrap;align-items:end}
+label{display:block;color:#b5cce4;font-size:.9rem;margin-bottom:5px}
+select,input,button{padding:11px;border:1px solid #3b5878;border-radius:9px;background:#08182a;color:#e7f0ff;font:inherit}
+select,input{flex:1;min-width:190px}button{background:#155c70;cursor:pointer}
+pre{white-space:pre-wrap;overflow-wrap:anywhere;max-height:60vh;overflow:auto;background:#071522;padding:12px;border-radius:9px}
+.status{padding:9px;background:#071522;border-radius:8px;color:#f2d28a}
+</style></head><body><main>
+<p class="muted">MN24 LABS · ANDROID24CREATOR APPBUILDER</p>
+<h1>UNIVERSAL PROJECT IMPORTER</h1>
+<p class="muted">Inspecciona proyectos GitHub antes de importarlos. Esta versión crea un manifiesto de metadatos; no descarga ni ejecuta código.</p>
+<section class="panel">
+<div class="row">
+<div style="flex:2"><label for="repo">Repositorio autorizado</label><select id="repo"><option value="ligyurbina59-svg/Cebolla">Cebolla · proyectos y prototipos</option><option value="ligyurbina59-svg/HOLOOS">HOLOOS · núcleo principal</option></select></div>
+<div style="flex:1"><label for="ref">Rama</label><input id="ref" value="main"></div>
+<button id="inspect">Inspeccionar proyecto</button>
+</div>
+<p id="status" class="status">Preparado · revisión de solo lectura.</p>
+</section>
+<section class="panel">
+<h2>Manifiesto de importación</h2><pre id="manifest" class="muted">Selecciona un repositorio y ejecuta la inspección.</pre>
+</section>
+<section class="panel">
+<h2>Flujo seguro de importación</h2>
+<ol class="muted"><li>Inspeccionar árbol y metadatos.</li><li>Revisar dependencias, licencias, archivos y permisos.</li><li>Seleccionar manualmente los componentes.</li><li>Copiar a una rama de trabajo aislada.</li><li>Ejecutar pruebas y revisar el diff antes de abrir un PR.</li></ol>
+<p class="muted">La importación de archivos, compilación, instalación de dependencias y ejecución de proyectos siguen pendientes de una etapa posterior con aprobación explícita.</p>
+</section>
+<p><a href="/app/expansion" style="color:#a5d2ff">← MN24 Global Expansion</a></p>
+</main>
+<script>
+const $=id=>document.getElementById(id);
+$("inspect").addEventListener("click",async()=>{
+ const repo=$("repo").value,ref=$("ref").value.trim();
+ $("status").textContent="Inspeccionando metadatos de "+repo+"…";$("manifest").textContent="";
+ try{
+  const url=new URL("/api/integrations/github/project/inspect",location.origin);
+  url.searchParams.set("repository",repo);url.searchParams.set("ref",ref);
+  const response=await fetch(url,{headers:{Accept:"application/json"}});
+  const data=await response.json();if(!response.ok)throw new Error(data.detail||"Inspección fallida");
+  $("manifest").textContent=JSON.stringify(data,null,2);
+  $("status").textContent="Inspección completada · "+data.project.file_count+" archivos · "+data.project.category+" · no se ejecutó código.";
+ }catch(e){$("status").textContent="Error: "+e.message;}
+});
+</script></body></html>

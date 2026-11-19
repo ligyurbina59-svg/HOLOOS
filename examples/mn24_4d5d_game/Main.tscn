@@ -1,0 +1,10 @@
+[gd_scene load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://mn24_4d5d_game.gd" id="1_game"]
+
+[node name="MN24_4D5D_Explorer" type="Node3D"]
+script = ExtResource("1_game")
+
+[node name="Camera3D" type="Camera3D" parent="."]
+position = Vector3(0, 0, 14)
+current = true

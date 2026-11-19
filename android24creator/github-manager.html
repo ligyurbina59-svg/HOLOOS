@@ -1,0 +1,114 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#07111f">
+<title>Android24Creator · GitHub Manager</title>
+<style>
+:root{color-scheme:dark;font-family:system-ui,sans-serif;background:#07111f;color:#e5edf8}
+*{box-sizing:border-box}body{margin:0;min-height:100vh;background:radial-gradient(circle at 10% 0,#142b49,#07111f 48%)}
+main{max-width:1100px;margin:auto;padding:24px 16px}.top{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+h1{font-size:clamp(1.4rem,4vw,2.2rem);margin:0}.muted{color:#9fb1c8}.panel{background:#101e30;border:1px solid #263d59;border-radius:16px;padding:16px;margin-top:16px}
+.toolbar{display:flex;gap:8px;flex-wrap:wrap}input,button{font:inherit;border-radius:9px;border:1px solid #35516f;padding:10px;background:#0b1727;color:#e5edf8}
+input{flex:1;min-width:190px}button{cursor:pointer;background:#174579}button:focus-visible,input:focus-visible,a:focus-visible{outline:2px solid #8cc8ff;outline-offset:2px}
+.grid{display:grid;grid-template-columns:minmax(220px, .8fr) minmax(0,1.5fr);gap:16px}
+ul{list-style:none;padding:0;margin:10px 0}li{padding:9px;border-bottom:1px solid #263d59;overflow-wrap:anywhere}
+a{color:#9dccff}.status{padding:8px 10px;border-radius:8px;background:#0b1727;margin-top:12px;white-space:pre-wrap}
+pre{white-space:pre-wrap;overflow-wrap:anywhere;max-height:65vh;overflow:auto;background:#081321;padding:14px;border-radius:10px}
+@media(max-width:700px){.grid{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<main>
+<header class="top"><div aria-hidden="true" style="font-size:2rem">⌘</div><div><h1>Android24Creator · GitHub Manager</h1><div class="muted">HOLOOS · navegador de repositorio en modo solo lectura</div></div></header>
+<section class="panel">
+<div class="toolbar">
+<label class="muted" for="api">URL base de API</label>
+<input id="api" value="/api/integrations/github" autocomplete="url">
+<button id="connect">Conectar</button>
+</div>
+<div id="status" class="status" role="status" aria-live="polite">Listo para conectar con el backend FastAPI.</div>
+</section>
+<section class="panel">
+<div class="toolbar">
+<label class="muted" for="branch">Rama / referencia</label>
+<input id="branch" value="feat/android24creator-github-integration">
+<button id="refresh">Cargar raíz</button><button id="inspect">Analizar proyecto</button>
+</div>
+<div class="grid">
+<div><h2>Archivos y directorios</h2><ul id="tree"><li class="muted">Conecta para cargar el repositorio.</li></ul></div>
+<div><h2 id="file-title">Vista de archivo</h2><pre id="file" class="muted">Selecciona un archivo de texto.</pre></div>
+</div>
+</section>
+<p class="muted">Seguridad: esta interfaz no recibe ni almacena tokens. Todas las solicitudes pasan por el backend allowlist. No ejecuta archivos descargados.</p>
+</main>
+<script>
+const $ = id => document.getElementById(id);
+const state = { api: "/api/integrations/github", repository: "ligyurbina59-svg/HOLOOS" };
+function setStatus(message){ $("status").textContent = message; }
+function endpoint(path, params={}) {
+  const url = new URL(state.api.replace(/\/$/,"") + path, window.location.origin);
+  for (const [k,v] of Object.entries(params)) if (v) url.searchParams.set(k,v);
+  return url;
+}
+async function request(path, params={}) {
+  const response = await fetch(endpoint(path,params), {headers:{Accept:"application/json"}});
+  if (!response.ok) throw new Error("API HTTP " + response.status + ": " + (await response.text()).slice(0,300));
+  return response.json();
+}
+function addEntry(item, parentPath) {
+  const li=document.createElement("li");
+  const button=document.createElement("button");
+  button.type="button";
+  button.textContent=(item.type==="dir"?"📁 ":"📄 ")+item.name;
+  button.addEventListener("click",()=> item.type==="dir" ? loadDirectory(item.path) : loadFile(item.path));
+  li.append(button);
+  if(item.type==="file" && item.html_url){
+    const link=document.createElement("a"); link.href=item.html_url; link.target="_blank"; link.rel="noopener noreferrer"; link.textContent=" · GitHub";
+    li.append(link);
+  }
+  return li;
+}
+async function loadDirectory(path="") {
+  setStatus("Cargando " + (path || "/") + " …");
+  try {
+    const items=await request("/contents",{repository:state.repository,path,ref:$("branch").value.trim()});
+    if(!Array.isArray(items)) throw new Error("La ruta no es un directorio.");
+    const tree=$("tree"); tree.replaceChildren();
+    if(path){const up=document.createElement("li");const b=document.createElement("button");b.textContent="↑ Volver a raíz";b.onclick=()=>loadDirectory("");up.append(b);tree.append(up);}
+    for(const item of items) tree.append(addEntry(item,path));
+    if(!items.length) tree.innerHTML="<li class='muted'>Directorio vacío.</li>";
+    setStatus("Directorio cargado: "+(path||"/")+" · "+items.length+" elementos.");
+  } catch(e){setStatus("Error: "+e.message);}
+}
+async function loadFile(path) {
+  setStatus("Leyendo "+path+" …");
+  try {
+    const file=await request("/file",{repository:state.repository,path,ref:$("branch").value.trim()});
+    $("file-title").textContent=file.path;
+    $("file").textContent=file.content;
+    setStatus("Archivo de texto cargado · SHA "+file.sha);
+  } catch(e){setStatus("No se pudo leer el archivo: "+e.message);}
+}
+$("connect").addEventListener("click",async()=>{
+  state.api=$("api").value.trim().replace(/\/$/,"");
+  try {
+    const health=await request("/health");
+    setStatus("Backend disponible · modo "+health.mode+" · token configurado: "+(health.credential_configured?"sí":"no"));
+    await loadDirectory("");
+  } catch(e){setStatus("Conexión fallida: "+e.message);}
+});
+$("refresh").addEventListener("click",()=>loadDirectory(""));
+$("inspect").addEventListener("click",async()=>{
+  setStatus("Analizando estructura del proyecto (solo metadatos)…");
+  try {
+    const result=await request("/project/inspect",{repository:state.repository,ref:$("branch").value.trim()});
+    $("file-title").textContent="Manifiesto de importación · "+result.project.name;
+    $("file").textContent=JSON.stringify(result,null,2);
+    setStatus("Inspección terminada · "+result.project.file_count+" entradas · "+result.project.category+" · no se descargó ni ejecutó código.");
+  } catch(e){setStatus("Error de inspección: "+e.message);}
+});
+</script>
+</body>
+</html>

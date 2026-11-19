@@ -1,0 +1,106 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#07111f"><meta name="description" content="MN24 LIVE GLOBAL — transmisiones sociales WebRTC para Web, Android y PC">
+<title>MN24 LIVE GLOBAL</title>
+<style>
+:root{color-scheme:dark;font-family:system-ui,sans-serif;background:#07111f;color:#edf5ff}
+*{box-sizing:border-box}body{margin:0;background:radial-gradient(circle at 50% 0,#16365d,#07111f 58%);min-height:100vh}
+main{max-width:1160px;margin:auto;padding:24px 16px 48px}.muted{color:#9fb2ca}.tag{font-size:.75rem;color:#67dfc5;letter-spacing:.12em}
+h1{font-size:clamp(2rem,6vw,3.5rem);margin:.2rem 0;color:#a8d8ff}.panel{background:#101f32;border:1px solid #29435f;border-radius:16px;padding:16px;margin:14px 0}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:12px}
+button,select,input{font:inherit;border-radius:9px;padding:10px;border:1px solid #365574;background:#071727;color:#fff}
+button{cursor:pointer;background:#146c82;border:0}button.secondary{background:#263c56}button:disabled{opacity:.5;cursor:not-allowed}
+.row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}.row input{min-width:0;flex:1}
+video{width:100%;max-height:360px;aspect-ratio:16/9;background:#030812;border-radius:12px;object-fit:contain}
+#remoteVideos{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:10px}
+#remoteVideos video{width:100%}#remoteVideos audio{display:none}.pill{font-size:.75rem;color:#f2d18a}
+#chatlog{height:180px;overflow:auto;background:#071727;border-radius:10px;padding:10px;white-space:pre-wrap}
+.slots{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}.slot{border:1px dashed #52708d;border-radius:10px;padding:18px 6px;text-align:center;color:#9fb2ca}
+a{color:#9bdcff}button:focus-visible,a:focus-visible,input:focus-visible{outline:3px solid #a58cff;outline-offset:2px}
+small{color:#9fb2ca}.room{padding:8px;border-bottom:1px solid #29435f;cursor:pointer}.room:hover{background:#1a3048}
+</style></head>
+<body><main>
+<p class="tag">MN24 LABS · ANDROID24CREATOR APPBUILDER + EXPANSION</p>
+<h1>MN24 LIVE GLOBAL</h1>
+<p class="muted">Plataforma social de vídeo y audio en directo, gaming y comunidades. Producto independiente de MN24 Labs.</p>
+<div class="panel">
+ <div class="row"><strong>Estado:</strong><span id="serviceStatus" class="pill">Consultando backend…</span></div>
+ <p class="muted">Web · Android (PWA/Chrome) · PC. Para medios en vivo necesitas un backend LiveKit configurado, HTTPS en producción y una sesión válida de Android24Creator.</p>
+</div>
+<div class="grid">
+ <section class="panel">
+  <h2>🔐 Sesión MN24</h2>
+  <label for="appToken">JWT de acceso emitido por el login MN24</label>
+  <input id="appToken" type="password" autocomplete="off" placeholder="Pega tu access token (solo memoria de esta pestaña)" style="width:100%;margin:8px 0">
+  <p class="muted">No se guarda en localStorage. No pegues claves de LiveKit aquí. El servidor valida el JWT y firma los tokens multimedia.</p>
+  <button id="loadRooms" class="secondary">Actualizar salas</button>
+  <p id="authStatus" class="muted">No autenticado.</p>
+ </section>
+ <section class="panel">
+  <h2>➕ Crear sala</h2>
+  <input id="newRoomId" placeholder="room-id (ej. mn24-global)" maxlength="48" style="width:100%;margin:5px 0">
+  <input id="newRoomTitle" placeholder="Título de la transmisión" maxlength="100" style="width:100%;margin:5px 0">
+  <div class="row"><select id="category"><option value="social">Social</option><option value="gaming">Gaming</option><option value="music">Música</option><option value="education">E-learning</option><option value="business">Negocios</option></select><select id="language"><option value="es">Español</option><option value="en">English</option><option value="pt">Português</option><option value="fr">Français</option></select><button id="createRoom">Crear</button></div>
+  <p id="createStatus" class="muted">Solo usuarios autenticados pueden crear salas.</p>
+ </section>
+ <section class="panel">
+  <h2>🌐 Salas disponibles</h2><div id="roomList" class="muted">Cargando…</div>
+ </section>
+ <section class="panel">
+  <h2>🎥 Live Studio / Game Live</h2>
+  <p class="muted">Selecciona una sala y entra como anfitrión o espectador. La publicación solicita permisos de cámara y micrófono.</p>
+  <div class="row"><input id="roomId" placeholder="ID de sala" maxlength="48"><select id="role"><option value="viewer">Espectador</option><option value="host">Anfitrión</option></select></div>
+  <div class="row" style="margin-top:8px"><button id="join">Entrar</button><button id="publish" disabled>Activar cámara y micrófono</button><button id="leave" class="secondary" disabled>Salir</button></div>
+  <p id="mediaStatus" class="muted">Desconectado.</p>
+  <video id="localVideo" autoplay muted playsinline></video><div id="remoteVideos"></div>
+ </section>
+ <section class="panel">
+  <h2>💬 Chat de sala en tiempo real</h2><div id="chatlog" aria-live="polite">Conecta una sala para habilitar el chat.</div>
+  <form id="chatForm" class="row" style="margin-top:8px"><input id="chatInput" type="text" maxlength="500" placeholder="Escribe un mensaje…" required disabled><button id="chatSend" disabled>Enviar</button></form>
+ </section>
+ <section class="panel">
+  <h2>👥 Multi-Guest</h2><p class="muted">El SFU permite que varios participantes publiquen y reciban pistas multimedia. La promoción de invitados requiere autorización de backend.</p>
+  <div class="slots"><div class="slot">Host</div><div class="slot">Invitado 1</div><div class="slot">Invitado 2</div><div class="slot">Invitado 3</div><div class="slot">Invitado 4</div><div class="slot">Invitado 5</div></div>
+ </section>
+ <section class="panel">
+  <h2>⚔️ PK Battle (demo)</h2><p class="muted">Marcador de interfaz. No representa dinero ni premios reales.</p>
+  <div class="row"><strong>Equipo A: <span id="scoreA">0</span></strong><button id="voteA">Apoyar A</button><strong>Equipo B: <span id="scoreB">0</span></strong><button id="voteB">Apoyar B</button></div><button class="secondary" id="reset">Reiniciar</button>
+ </section>
+ <section class="panel">
+  <h2>🎁 Regalos simbólicos (demo)</h2><p class="muted">Sin compras, saldo, pagos ni conversión monetaria.</p>
+  <div class="row"><button class="gift" data-gift="Estrella">⭐ Estrella</button><button class="gift" data-gift="Corazón">💙 Corazón</button><button class="gift" data-gift="Cohete">🚀 Cohete</button></div><p id="giftStatus" class="muted">Sin interacciones.</p>
+ </section>
+ <section class="panel">
+  <h2>🛡 Seguridad</h2><p class="muted">Los controles de reporte/bloqueo requieren endpoints de moderación y revisión humana antes de producción.</p>
+  <p id="safetyStatus" class="muted">Backend de moderación: PENDIENTE.</p>
+ </section>
+</div>
+<div class="panel"><h2>Roadmap de producción</h2>
+<ul class="muted"><li>IMPLEMENTADO: salas persistentes SQLite, JWT HS256 validado, tokens LiveKit con roles, WebSocket chat autenticado.</li><li>SIMULADO: PK Battle y regalos simbólicos.</li><li>PENDIENTE: login MN24 conectado, PostgreSQL, Redis, TURN/TLS, grabación/Egress, moderación, traducción IA, pagos y payouts.</li></ul>
+<p><a href="/app/expansion">← Volver a MN24 Global Expansion</a> · <a href="/api/live/health">Estado API</a></p></div>
+</main>
+<script type="module">
+const $=id=>document.getElementById(id);
+let room=null,localTracks=[],chatSocket=null,appToken="",livekitModule=null;
+const api="/api/live";
+function authHeaders(){return {"Authorization":"Bearer "+appToken,"Content-Type":"application/json"};}
+function setStatus(id,msg){$(id).textContent=msg;}
+async function loadHealth(){try{const r=await fetch(api+"/health");const d=await r.json();setStatus("serviceStatus",d.livekit_configured?"LiveKit configurado · "+d.status:"Backend disponible · LiveKit pendiente");}catch(e){setStatus("serviceStatus","Backend no disponible");}}
+async function loadRooms(){try{const r=await fetch(api+"/rooms");const d=await r.json();$("roomList").replaceChildren();if(!d.rooms.length){$("roomList").textContent="Todavía no hay salas.";return;}for(const item of d.rooms){const div=document.createElement("div");div.className="room";div.textContent=item.title+" · "+item.room_id+" · "+item.status;div.onclick=()=>{$("roomId").value=item.room_id;};$("roomList").append(div);}}catch(e){$("roomList").textContent="No se pudieron cargar las salas.";}}
+$("loadRooms").onclick=async()=>{appToken=$("appToken").value.trim();setStatus("authStatus",appToken?"Token cargado en memoria; se validará al llamar la API.":"Introduce el JWT de tu sesión MN24.");await loadRooms();};
+$("createRoom").onclick=async()=>{appToken=$("appToken").value.trim();const payload={room_id:$("newRoomId").value.trim().toLowerCase(),title:$("newRoomTitle").value.trim(),category:$("category").value,language:$("language").value};try{const r=await fetch(api+"/rooms",{method:"POST",headers:authHeaders(),body:JSON.stringify(payload)});const d=await r.json();if(!r.ok)throw new Error(d.detail||"Error");$("roomId").value=d.room_id;setStatus("createStatus","Sala creada: "+d.room_id);await loadRooms();}catch(e){setStatus("createStatus","No se pudo crear: "+e.message);}};
+async function getSDK(){if(!livekitModule)livekitModule=await import("https://cdn.jsdelivr.net/npm/livekit-client@2/+esm");return livekitModule;}
+function addTrack(track,publication,participant){const element=track.attach();element.dataset.participant=participant.identity;element.style.width="100%";if(track.kind==="audio")element.style.display="none";$("remoteVideos").append(element);}
+function removeTrack(track){track.detach().forEach(el=>el.remove());}
+async function connectChat(id){if(chatSocket)chatSocket.close();const wsProto=location.protocol==="https:"?"wss:":"ws:";chatSocket=new WebSocket(wsProto+"//"+location.host+api+"/ws/"+encodeURIComponent(id)+"?token="+encodeURIComponent(appToken));chatSocket.onmessage=e=>{const data=JSON.parse(e.data);const line=document.createElement("div");if(data.type==="chat")line.textContent=data.identity+": "+data.message;else if(data.type==="presence")line.textContent=data.identity+" "+data.event;else line.textContent=data.detail||"Evento";$("chatlog").append(line);$("chatlog").scrollTop=$("chatlog").scrollHeight;};chatSocket.onopen=()=>{ $("chatInput").disabled=false;$("chatSend").disabled=false;};chatSocket.onclose=()=>{ $("chatInput").disabled=true;$("chatSend").disabled=true;};}
+$("join").onclick=async()=>{appToken=$("appToken").value.trim();const id=$("roomId").value.trim().toLowerCase();if(!appToken||!id){setStatus("mediaStatus","Necesitas JWT MN24 y un ID de sala.");return;}try{const role=$("role").value;const tokenRes=await fetch(api+"/token",{method:"POST",headers:authHeaders(),body:JSON.stringify({room_id:id,role})});const tokenData=await tokenRes.json();if(!tokenRes.ok)throw new Error(tokenData.detail||"Token no disponible");const sdk=await getSDK();room=new sdk.Room({adaptiveStream:true,dynacast:true});room.on(sdk.RoomEvent.TrackSubscribed,addTrack);room.on(sdk.RoomEvent.TrackUnsubscribed,removeTrack);room.on(sdk.RoomEvent.Disconnected,()=>setStatus("mediaStatus","Desconectado."));await room.connect(tokenData.server_url,tokenData.token);$("join").disabled=true;$("leave").disabled=false;$("publish").disabled=role==="viewer";setStatus("mediaStatus","Conectado a "+id+" como "+role+".");$("chatlog").textContent="Chat conectado.";await connectChat(id);}catch(e){setStatus("mediaStatus","Conexión fallida: "+e.message);}};
+$("publish").onclick=async()=>{if(!room)return;try{const sdk=await getSDK();localTracks=await sdk.createLocalTracks({audio:true,video:{facingMode:"user"}});for(const track of localTracks){await room.localParticipant.publishTrack(track);if(track.kind==="video")$("localVideo").srcObject=new MediaStream([track.mediaStreamTrack]);}setStatus("mediaStatus","Cámara y micrófono publicados en la sala.");}catch(e){setStatus("mediaStatus","No se pudo publicar: "+e.message);}};
+$("leave").onclick=async()=>{try{localTracks.forEach(t=>t.stop());localTracks=[];if(room)await room.disconnect();room=null;if(chatSocket)chatSocket.close();$("localVideo").srcObject=null;$("remoteVideos").replaceChildren();$("join").disabled=false;$("leave").disabled=true;$("publish").disabled=true;setStatus("mediaStatus","Saliste de la sala.");}catch(e){setStatus("mediaStatus","Error al salir: "+e.message);}};
+$("chatForm").onsubmit=e=>{e.preventDefault();const message=$("chatInput").value.trim();if(!message||!chatSocket||chatSocket.readyState!==WebSocket.OPEN)return;chatSocket.send(JSON.stringify({type:"chat",message}));$("chatInput").value="";};
+let scoreA=0,scoreB=0;const scores=()=>{$("scoreA").textContent=scoreA;$("scoreB").textContent=scoreB;};$("voteA").onclick=()=>{scoreA++;scores();};$("voteB").onclick=()=>{scoreB++;scores();};$("reset").onclick=()=>{scoreA=scoreB=0;scores();};
+document.querySelectorAll(".gift").forEach(b=>b.onclick=()=>setStatus("giftStatus","Interacción simbólica: "+b.dataset.gift+" (sin valor monetario)."));
+window.addEventListener("pagehide",()=>{localTracks.forEach(t=>t.stop());room?.disconnect();chatSocket?.close();});
+await Promise.all([loadHealth(),loadRooms()]);
+</script></body></html>
