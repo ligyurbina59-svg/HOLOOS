@@ -18,6 +18,7 @@ from pathlib import Path
 from typing import Literal
 
 import qrcode
+from qrcode.image.svg import SvgPathImage
 from fastapi import APIRouter, Depends, HTTPException, Request
 from fastapi.responses import Response
 from pydantic import BaseModel, Field, field_validator
@@ -97,7 +98,7 @@ def _qr_svg(payload: str) -> bytes:
     code = qrcode.QRCode(version=None, error_correction=qrcode.constants.ERROR_CORRECT_M, box_size=6, border=3)
     code.add_data(payload)
     code.make(fit=True)
-    image = code.make_image(image_factory=qrcode.image.svg.SvgPathImage)
+    image = code.make_image(image_factory=SvgPathImage)
     output = BytesIO()
     image.save(output)
     return output.getvalue()
@@ -138,8 +139,8 @@ async def create_handoff(payload: HandoffCreate, user: dict = Depends(current_us
     }
 
 
-@router.get("/handoffs/{handoff_id}/qr")
-async def handoff_qr(handoff_id: str, request: Request, token: str, user: dict = Depends(current_user)) -> Response:
+@router.post("/handoffs/{handoff_id}/qr")
+async def handoff_qr(handoff_id: str, request: Request, payload: HandoffRedeem, user: dict = Depends(current_user)) -> Response:
     with _db() as conn:
         row = conn.execute(
             "SELECT owner,token_hash,expires_at,consumed_at FROM contactless_handoffs WHERE handoff_id=?",
@@ -149,9 +150,9 @@ async def handoff_qr(handoff_id: str, request: Request, token: str, user: dict =
         raise HTTPException(status_code=404, detail="Handoff not found")
     if row["consumed_at"] is not None or row["expires_at"] <= int(time.time()):
         raise HTTPException(status_code=410, detail="Handoff expired or already consumed")
-    if not hmac.compare_digest(row["token_hash"], _token_digest(token)):
+    if not hmac.compare_digest(row["token_hash"], _token_digest(payload.token)):
         raise HTTPException(status_code=403, detail="Invalid handoff token")
-    target = str(request.base_url).rstrip("/") + "/app/contactless?redeem=" + token
+    target = str(request.base_url).rstrip("/") + "/app/contactless#redeem=" + payload.token
     return Response(content=_qr_svg(target), media_type="image/svg+xml", headers={"Cache-Control": "no-store"})
 
 
