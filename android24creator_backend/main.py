@@ -14,12 +14,13 @@ from integrations.ai_gateway.router import router as ai_router
 from integrations.cebolla_importer.router import router as cebolla_router
 from integrations.game_library.router import router as game_router
 from integrations.mn24_live.router import router as live_router
+from integrations.contactless.router import router as contactless_router
 
 ROOT = Path(__file__).resolve().parents[1]
 UI_DIR = ROOT / "android24creator"
 ASSET_DIR = ROOT / "assets"
 CEBOLLA_DIR = ROOT / "imports" / "Cebolla"
-app = FastAPI(title="Android24Creator Local Backend", version="0.3.0")
+app = FastAPI(title="Android24Creator Local Backend", version="0.4.0")
 origins = [
     item.strip()
     for item in os.getenv(
@@ -33,13 +34,14 @@ app.add_middleware(
     allow_origins=origins,
     allow_credentials=False,
     allow_methods=["GET", "POST"],
-    allow_headers=["Accept", "Content-Type"],
+    allow_headers=["Accept", "Content-Type", "Authorization"],
 )
 app.include_router(github_router, prefix="/api")
 app.include_router(ai_router, prefix="/api")
 app.include_router(cebolla_router, prefix="/api")
 app.include_router(game_router, prefix="/api")
 app.include_router(live_router, prefix="/api")
+app.include_router(contactless_router, prefix="/api")
 app.mount("/assets", StaticFiles(directory=str(ASSET_DIR), check_dir=False), name="assets")
 app.mount(
     "/projects/cebolla",
@@ -54,7 +56,7 @@ async def health() -> dict[str, str]:
         "service": "android24creator-local-backend",
         "status": "ok",
         "runtime": "termux-ready",
-        "version": "0.3.0",
+        "version": "0.4.0",
     }
 
 
@@ -105,6 +107,7 @@ async def game_library():
         return JSONResponse(status_code=404, content={"detail": "Game library UI file not found"})
     return FileResponse(file, media_type="text/html")
 
+
 @app.get("/app/clipboard", include_in_schema=False)
 async def clipboard_demo():
     file = UI_DIR / "clipboard.html"
@@ -119,6 +122,14 @@ async def clipboard_script():
     if not file.is_file():
         return JSONResponse(status_code=404, content={"detail": "Clipboard script file not found"})
     return FileResponse(file, media_type="application/javascript")
+
+
+@app.get("/app/contactless", include_in_schema=False)
+async def contactless_app():
+    file = UI_DIR / "contactless.html"
+    if not file.is_file():
+        return JSONResponse(status_code=404, content={"detail": "Contactless AI UI file not found"})
+    return FileResponse(file, media_type="text/html")
 
 
 @app.get("/app/reality-4d", include_in_schema=False)
