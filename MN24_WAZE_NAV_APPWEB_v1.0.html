@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
+<meta name="theme-color" content="#0b1220">
+<title>MN24 Nav · Waze</title>
+<style>
+:root{--bg:#0b1220;--p:#121a2b;--line:#243047;--c:#33d6ff;--g:#3dd68c;--t:#e8eef8;--m:#8b9bb4;--w:#fbbf24;--r:#f87171;--or:#fb923c}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;height:100%;background:var(--bg);color:var(--t);font:13px/1.4 system-ui,sans-serif;overflow:hidden}
+.app{display:flex;flex-direction:column;height:100%;max-width:480px;margin:0 auto}
+.hdr{padding:12px;background:linear-gradient(165deg,#0f2744,#0b1220 80%);border-bottom:1px solid var(--line)}
+.brand{font-weight:900;letter-spacing:1px}.brand span{color:var(--c)}
+.brand small{display:block;font-size:10px;color:var(--m);font-weight:500}
+.tabs{display:flex;gap:4px;padding:8px;border-bottom:1px solid var(--line);overflow-x:auto}
+.tabs button{flex:0 0 auto;padding:8px 12px;border-radius:12px;border:1px solid var(--line);background:var(--p);color:var(--t);font-size:11px;font-weight:700}
+.tabs button.on{border-color:var(--c);color:var(--c);background:#0c1e33}
+main{flex:1;overflow-y:auto;padding:12px;-webkit-overflow-scrolling:touch}
+.panel{background:var(--p);border:1px solid var(--line);border-radius:16px;padding:16px;margin-bottom:10px}
+h2{margin:0 0 8px;font-size:15px;color:var(--c)}
+.muted{color:var(--m);font-size:11px;line-height:1.45}
+.status{font-size:12px;padding:10px;border-radius:10px;background:#0b1220;border:1px solid var(--line);margin:8px 0;min-height:44px;white-space:pre-wrap}
+button.btn{width:100%;padding:14px;border:0;border-radius:12px;font-weight:800;margin:6px 0;background:linear-gradient(135deg,#33d6ff,#2563eb);color:#031016}
+button.btn.sec{background:#1a2438;border:1px solid var(--line);color:var(--t);font-weight:600}
+button.btn.waze{background:linear-gradient(135deg,#33ccff,#0099ff);color:#002233}
+button.btn.maps{background:linear-gradient(135deg,#34d399,#059669);color:#031016}
+input{width:100%;padding:12px;border-radius:10px;border:1px solid var(--line);background:#0b1220;color:var(--t);margin:4px 0}
+.item{display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid var(--line);font-size:12px}
+.tag{font-size:9px;padding:2px 8px;border-radius:6px;border:1px solid var(--line);color:var(--m)}
+.tag.ok{border-color:var(--g);color:var(--g)}.tag.sim{border-color:var(--w);color:var(--w)}.tag.norf{border-color:var(--r);color:var(--r)}
+.radio-card{border:1px solid var(--line);border-radius:12px;padding:12px;margin:8px 0;background:#0b1220}
+.radio-card strong{display:block;font-size:13px}
+.radio-card .meta{font-size:11px;color:var(--m);margin-top:4px}
+.warn{font-size:10px;color:#fde68a;background:#1c1408;border:1px solid #a16207;border-radius:8px;padding:8px;line-height:1.4;margin:8px 0}
+footer{font-size:9px;text-align:center;color:var(--m);padding:6px;border-top:1px solid var(--line)}
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="hdr">
+    <div class="brand"><span>MN24</span> NAV · WAZE
+      <small>App web + APK · GPS · deep link · radios UI</small>
+    </div>
+  </div>
+  <div class="tabs" id="tabs">
+    <button class="on" data-v="nav">Navegar</button>
+    <button data-v="radio">Radios</button>
+    <button data-v="help">Ayuda</button>
+  </div>
+  <main id="main"></main>
+  <footer>Geolocalización requiere permiso · Waze/Maps se abren fuera de la app</footer>
+</div>
+<script>
+const ST={v:'nav', lat:null, lon:null, acc:null};
+const $=id=>document.getElementById(id);
+const el=(t,c,x)=>{const n=document.createElement(t);if(c)n.className=c;if(x!=null)n.textContent=x;return n;};
+
+function openWaze(lat, lon, navigate){
+  // Deep link oficial: ll=lat,lon
+  const nav = navigate ? '&navigate=yes' : '';
+  const url = 'https://waze.com/ul?ll=' + encodeURIComponent(lat + ',' + lon) + nav;
+  try { window.open(url, '_blank', 'noopener'); } catch(e) { location.href = url; }
+}
+
+function openGoogleMaps(lat, lon){
+  const url = 'https://www.google.com/maps/dir/?api=1&destination=' + encodeURIComponent(lat + ',' + lon);
+  try { window.open(url, '_blank', 'noopener'); } catch(e) { location.href = url; }
+}
+
+function getLocationAndOpenWaze(navigate){
+  const status = $('status');
+  if(!navigator.geolocation){
+    if(status) status.textContent = 'Tu navegador/WebView no soporta geolocalización.';
+    return;
+  }
+  if(status) status.textContent = 'Obteniendo ubicación…';
+  navigator.geolocation.getCurrentPosition(
+    (pos)=>{
+      ST.lat = pos.coords.latitude;
+      ST.lon = pos.coords.longitude;
+      ST.acc = pos.coords.accuracy;
+      if(status) status.textContent = 'Ubicación: ' + ST.lat.toFixed(6) + ', ' + ST.lon.toFixed(6) +
+        (ST.acc!=null ? ('\nPrecisión ~' + Math.round(ST.acc) + ' m') : '');
+      openWaze(ST.lat, ST.lon, !!navigate);
+    },
+    (err)=>{
+      if(status) status.textContent = 'Error GPS: ' + err.message +
+        '\nActiva ubicación y permiso para esta app/navegador.';
+    },
+    { enableHighAccuracy:true, timeout:20000, maximumAge:10000 }
+  );
+}
+
+function onlyLocate(){
+  const status = $('status');
+  if(!navigator.geolocation){
+    if(status) status.textContent = 'Sin soporte de geolocalización.';
+    return;
+  }
+  if(status) status.textContent = 'Obteniendo ubicación…';
+  navigator.geolocation.getCurrentPosition(
+    (pos)=>{
+      ST.lat = pos.coords.latitude;
+      ST.lon = pos.coords.longitude;
+      ST.acc = pos.coords.accuracy;
+      if(status) status.textContent = 'Ubicación: ' + ST.lat.toFixed(6) + ', ' + ST.lon.toFixed(6) +
+        (ST.acc!=null ? ('\nPrecisión ~' + Math.round(ST.acc) + ' m') : '');
+    },
+    (err)=>{ if(status) status.textContent = 'Error GPS: ' + err.message; },
+    { enableHighAccuracy:true, timeout:20000, maximumAge:5000 }
+  );
+}
+
+function render(){
+  [...$('tabs').children].forEach(b=>b.classList.toggle('on', b.dataset.v===ST.v));
+  const m=$('main'); m.innerHTML='';
+
+  if(ST.v==='nav'){
+    const p=el('div','panel');
+    p.appendChild(el('h2',null,'GPS → Waze'));
+    p.appendChild(el('p','muted','Obtiene tu posición y abre Waze (o Maps). El deep link usa ll=lat,lon. Si Waze no está instalado, se abre la web.'));
+    const st=el('div','status'); st.id='status';
+    st.textContent = ST.lat!=null
+      ? ('Última: ' + ST.lat.toFixed(6) + ', ' + ST.lon.toFixed(6))
+      : 'Sin ubicación todavía.';
+    p.appendChild(st);
+
+    const b1=el('button','btn','Solo obtener ubicación');
+    b1.onclick=onlyLocate;
+    const b2=el('button','btn waze','Ubicación + abrir Waze (navegar)');
+    b2.onclick=()=>getLocationAndOpenWaze(true);
+    const b3=el('button','btn waze','Ubicación + Waze (sin navegar)');
+    b3.onclick=()=>getLocationAndOpenWaze(false);
+    const b4=el('button','btn maps','Ubicación + Google Maps');
+    b4.onclick=()=>{
+      onlyLocate();
+      setTimeout(()=>{
+        if(ST.lat!=null) openGoogleMaps(ST.lat, ST.lon);
+        else {
+          const status=$('status');
+          navigator.geolocation.getCurrentPosition(pos=>{
+            openGoogleMaps(pos.coords.latitude, pos.coords.longitude);
+          }, e=>{ if(status) status.textContent='Error: '+e.message; });
+        }
+      }, 400);
+    };
+    p.appendChild(b1); p.appendChild(b2); p.appendChild(b3); p.appendChild(b4);
+
+    p.appendChild(el('p','muted','Destino manual (lat, lon)'));
+    const latIn=document.createElement('input'); latIn.placeholder='Latitud ej. 9.9281'; latIn.inputMode='decimal';
+    const lonIn=document.createElement('input'); lonIn.placeholder='Longitud ej. -84.0907'; lonIn.inputMode='decimal';
+    const go=el('button','btn sec','Abrir Waze a estas coords');
+    go.onclick=()=>{
+      const la=parseFloat(latIn.value), lo=parseFloat(lonIn.value);
+      if(isNaN(la)||isNaN(lo)){ alert('Introduce lat y lon válidos'); return; }
+      openWaze(la, lo, true);
+    };
+    p.appendChild(latIn); p.appendChild(lonIn); p.appendChild(go);
+
+    p.appendChild(el('div','warn')).textContent='En Android el WebView necesita permiso de ubicación. Si falla, revisa Ajustes → Apps → esta app → Ubicación. Waze y Maps se abren como apps externas.';
+    m.appendChild(p);
+  }
+
+  else if(ST.v==='radio'){
+    const p=el('div','panel');
+    p.appendChild(el('h2',null,'Radios (tus fotos)'));
+    p.appendChild(el('p','muted','Checklist de hardware. RF real no sale desde el APK.'));
+
+    const d1=el('div','radio-card');
+    d1.innerHTML='<strong>Motorola DEP 450</strong><div class="meta">PTT físico · profesional</div>';
+    p.appendChild(d1);
+    const i1=el('div','item'); i1.appendChild(el('span',null,'TX/RX desde APK')); i1.appendChild(el('span','tag norf','No RF')); p.appendChild(i1);
+    const i2=el('div','item'); i2.appendChild(el('span',null,'UI PTT demo')); i2.appendChild(el('span','tag sim','sim')); p.appendChild(i2);
+
+    const d2=el('div','radio-card');
+    d2.innerHTML='<strong>Midland X-Talker</strong><div class="meta">Canal 8 · CTCSS 37 (pantalla de tu equipo)</div>';
+    p.appendChild(d2);
+    const i3=el('div','item'); i3.appendChild(el('span',null,'Cambiar canal desde APK')); i3.appendChild(el('span','tag norf','No RF')); p.appendChild(i3);
+    const i4=el('div','item'); i4.appendChild(el('span',null,'Checklist / notas')); i4.appendChild(el('span','tag ok','ok')); p.appendChild(i4);
+
+    p.appendChild(el('p','muted','Usa el radio real para hablar. Esta pestaña solo documenta el equipo y evita promesas falsas de RF.'));
+    m.appendChild(p);
+  }
+
+  else {
+    const p=el('div','panel');
+    p.appendChild(el('h2',null,'Cómo usar'));
+    p.appendChild(el('p','muted','1. Instala el APK (sideload) o abre el HTML en el navegador.\n2. Concede permiso de ubicación.\n3. Pulsa “Ubicación + abrir Waze”.\n4. Si Waze está instalado, suele abrir la app; si no, la web.'));
+    p.appendChild(el('p','muted','Código de deep link (corregido):\nhttps://waze.com/ul?ll=LAT,LON&navigate=yes'));
+    p.appendChild(el('div','warn')).textContent='No es un clon de Waze. No transmite radio Midland/DEP. App web embebida en APK (WebView).';
+    m.appendChild(p);
+  }
+}
+
+$('tabs').onclick=e=>{const b=e.target.closest('[data-v]');if(!b)return;ST.v=b.dataset.v;render();};
+render();
+</script>
+</body>
+</html>
